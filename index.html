@@ -1,0 +1,1257 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>七七剧本杀故事游戏中转站</title>
+<meta name="description" content="汇聚悬疑、恐怖、情感、古风等海量优质剧本杀故事作品，发现精彩剧情，一键进入七七剧本杀平台开启沉浸式推理体验。"/>
+<style>
+@font-face {
+  font-family: '优设标题黑';
+  src: url('https://resource-static.bj.bcebos.com/fonts-skill/YouSheBiaoTiHei_Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src: url('https://resource-static.bj.bcebos.com/fonts-skill/AlibabaPuHuiTi_Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* ── 设计系统变量 ─────────────────────────────────────── */
+:root {
+  --bg:       #FDFBF7;
+  --fg:       #1A1A1A;
+  --card:     #FFFFFF;
+  --primary:  #FF6B9D;   /* 印刷粉 */
+  --primary-fg:#FFFFFF;
+  --secondary:#2563EB;   /* 印刷蓝 */
+  --accent:   #F97316;   /* 橙色强调 */
+  --muted:    #EDEBE6;
+  --muted-fg: #6B6B6B;
+  --border:   #1A1A1A;
+  --radius:   2px;
+  --shadow-pink:  4px 4px 0 0 #FF6B9D;
+  --shadow-blue:  4px 4px 0 0 #2563EB;
+  --shadow-orange:4px 4px 0 0 #F97316;
+  --shadow-black: 4px 4px 0 0 #1A1A1A;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'AlibabaPuHuiTi','PingFang SC','Microsoft YaHei',sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fg) transparent;
+}
+h1,h2,h3,h4,.font-display {
+  font-family: '优设标题黑','AlibabaPuHuiTi',sans-serif;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ── 工具类 ──────────────────────────────────────────── */
+.container { width:100%; max-width:1280px; margin:0 auto; padding:0 16px; }
+.hidden { display:none !important; }
+
+/* 硬边印刷阴影 */
+.shadow-pink   { box-shadow: var(--shadow-pink); }
+.shadow-blue   { box-shadow: var(--shadow-blue); }
+.shadow-orange { box-shadow: var(--shadow-orange); }
+.shadow-black  { box-shadow: var(--shadow-black); }
+
+/* 按压动效 */
+.press { transition: transform .1s, box-shadow .1s; }
+.press:hover  { transform: translate(1px,1px); }
+.press:active { transform: translate(4px,4px); box-shadow: none !important; }
+
+/* 半调网点背景 */
+.halftone {
+  background-image: radial-gradient(#1A1A1A 1px, transparent 1px);
+  background-size: 8px 8px;
+  opacity: .04;
+  pointer-events: none;
+}
+
+/* 套印错位文字 */
+.text-offset { text-shadow: 2px 0 0 #FF6B9D, -2px 0 0 #2563EB; }
+
+/* ── 通用按钮 ────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; font-size: 14px; font-weight: 700;
+  border: 2px solid var(--fg); background: var(--fg);
+  color: var(--bg); white-space: nowrap;
+}
+.btn-outline {
+  background: var(--card); color: var(--fg);
+}
+.btn-primary {
+  background: var(--primary); color: var(--primary-fg);
+  border-color: var(--fg);
+}
+.btn-ghost {
+  background: transparent; color: var(--fg);
+  border-color: transparent;
+}
+.btn:focus-visible { outline: 2px solid var(--secondary); outline-offset: 2px; }
+
+/* ── 导航栏 ──────────────────────────────────────────── */
+#header {
+  position: sticky; top:0; z-index:100;
+  border-bottom: 2px solid var(--fg);
+  background: var(--bg);
+}
+#header .inner {
+  display: flex; align-items: center; gap: 12px;
+  height: 64px; padding: 0 16px;
+}
+#logo {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0; cursor: pointer;
+}
+#logo .logo-box {
+  width:36px; height:36px;
+  border: 2px solid var(--fg); background: var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'优设标题黑'; font-size:18px; font-weight:900;
+  color: var(--primary-fg);
+}
+#logo .logo-text {
+  font-family:'优设标题黑'; font-size:18px; font-weight:900; line-height:1.1;
+}
+/* 搜索区 */
+#search-wrap {
+  flex:1; max-width:420px; margin-left:auto; position:relative;
+}
+#search-box {
+  display:flex; align-items:stretch;
+  border: 2px solid var(--fg); background: var(--card);
+}
+#search-input {
+  flex:1; border:none; outline:none; padding:8px 12px;
+  font-family:inherit; font-size:14px; background:transparent; color:var(--fg);
+}
+#search-input::placeholder { color:var(--muted-fg); }
+#search-btn {
+  width:40px; flex-shrink:0;
+  border:none; border-left: 2px solid var(--fg);
+  background:transparent; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition: background .15s, color .15s;
+}
+#search-btn:hover { background: var(--primary); color: var(--primary-fg); }
+#search-dropdown {
+  position:absolute; left:0; right:0; top:calc(100%+4px);
+  border:2px solid var(--fg); background:var(--card);
+  box-shadow: var(--shadow-black);
+  max-height:280px; overflow-y:auto; z-index:200;
+}
+.search-item {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 12px; font-size:14px; cursor:pointer;
+  transition: background .1s;
+}
+.search-item:hover { background: var(--muted); }
+.search-item .label { font-weight:700; }
+.search-item .sub  { color: var(--muted-fg); font-size:12px; }
+
+/* 桌面导航 */
+#nav-desktop {
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+/* 移动端汉堡 */
+#menu-btn { display:none; }
+
+/* 移动菜单遮罩 */
+#mobile-overlay {
+  display:none; position:fixed; inset:0; z-index:300;
+}
+#mobile-overlay.open { display:block; }
+#mobile-backdrop {
+  position:absolute; inset:0; background:rgba(0,0,0,.4);
+}
+#mobile-drawer {
+  position:absolute; left:0; top:0; bottom:0; width:280px;
+  background:var(--bg); border-right:2px solid var(--fg);
+  padding:20px 16px; display:flex; flex-direction:column; gap:8px;
+  overflow-y:auto;
+}
+#mobile-drawer .drawer-title {
+  font-family:'优设标题黑'; font-size:18px; font-weight:900;
+  margin-bottom:12px; padding-bottom:12px;
+  border-bottom:2px dashed var(--fg);
+}
+.mobile-nav-item {
+  display:flex; align-items:center; gap:8px;
+  min-height:48px; padding:0 16px;
+  border:2px solid var(--fg); font-weight:700; font-size:15px;
+  background:var(--card); cursor:pointer; transition:background .1s;
+}
+.mobile-nav-item:hover { background:var(--muted); }
+.mobile-nav-item.primary-item {
+  background:var(--primary); color:var(--primary-fg);
+}
+
+/* ── 主内容 ───────────────────────────────────────────── */
+#app { flex:1; }
+.page { display:none; padding:24px 0 40px; }
+.page.active { display:block; }
+
+/* ── 首页 Hero ────────────────────────────────────────── */
+#hero {
+  position:relative; overflow:hidden;
+  border:2px solid var(--fg); background:var(--card);
+  box-shadow: var(--shadow-blue);
+  padding:40px 32px; margin-bottom:32px;
+}
+#hero .halftone { position:absolute; inset:0; }
+#hero .hero-content { position:relative; z-index:1; }
+.badge-hot {
+  display:inline-flex; align-items:center; gap:5px;
+  border:2px solid var(--fg); background:var(--accent);
+  padding:3px 10px; font-size:12px; font-weight:900; color:#fff;
+  margin-bottom:16px;
+}
+#hero h1 {
+  font-size:clamp(26px,5vw,52px); font-weight:900;
+  line-height:1.15; margin-bottom:12px;
+}
+#hero p {
+  font-size:14px; color:var(--muted-fg); max-width:600px;
+  line-height:1.7; margin-bottom:24px;
+}
+.hero-btns { display:flex; flex-wrap:wrap; gap:12px; }
+
+/* ── 区块标题 ─────────────────────────────────────────── */
+.section-title {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:16px;
+}
+.section-title .bar { width:6px; height:24px; flex-shrink:0; }
+.section-title h2 {
+  font-family:'优设标题黑'; font-size:clamp(18px,3vw,26px); font-weight:900;
+}
+
+/* ── 故事卡片网格 ─────────────────────────────────────── */
+.story-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+  gap:16px;
+}
+.story-card {
+  display:flex; flex-direction:column;
+  border:2px solid var(--fg); background:var(--card);
+  box-shadow: var(--shadow-pink);
+  cursor:pointer; transition:transform .1s, box-shadow .1s;
+  height:100%;
+}
+.story-card:hover  { transform:translate(1px,1px); }
+.story-card:active { transform:translate(4px,4px); box-shadow:none; }
+
+.story-card .cover-wrap {
+  position:relative; aspect-ratio:3/4; overflow:hidden;
+  border-bottom:2px solid var(--fg); background:var(--muted);
+}
+.story-card .cover-wrap img {
+  width:100%; height:100%; object-fit:cover;
+  transition:transform .3s;
+}
+.story-card:hover .cover-wrap img { transform:scale(1.05); }
+.card-badge-hot {
+  position:absolute; left:0; top:0;
+  border-bottom:2px solid var(--fg); border-right:2px solid var(--fg);
+  background:var(--accent); padding:2px 8px;
+  font-size:11px; font-weight:900; color:#fff;
+}
+.card-rating {
+  position:absolute; right:0; bottom:0;
+  border-top:2px solid var(--fg); border-left:2px solid var(--fg);
+  background:var(--primary); padding:3px 8px;
+  font-size:12px; font-weight:900; color:#fff;
+  display:flex; align-items:center; gap:3px;
+}
+.story-card .card-body {
+  display:flex; flex-direction:column; flex:1; padding:10px;
+}
+.card-title {
+  font-family:'优设标题黑'; font-size:15px; font-weight:900;
+  line-height:1.2; margin-bottom:4px;
+}
+.card-author { font-size:11px; color:var(--muted-fg); margin-bottom:8px; }
+.card-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+.tag {
+  display:inline-block; border:2px solid var(--fg);
+  padding:0 6px; font-size:10px; font-weight:700;
+}
+.card-meta {
+  margin-top:auto; display:flex; align-items:center; gap:10px;
+  font-size:11px; color:var(--muted-fg);
+}
+.card-meta span { display:flex; align-items:center; gap:3px; }
+
+/* 分类筛选条 */
+#category-bar {
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;
+}
+.cat-btn {
+  border:2px solid var(--fg); padding:6px 14px;
+  font-size:13px; font-weight:700; background:var(--card);
+  color:var(--fg); cursor:pointer; transition:background .1s, color .1s;
+}
+.cat-btn:hover { background:var(--muted); }
+.cat-btn.active { background:var(--primary); color:var(--primary-fg); }
+
+/* 空状态 */
+.empty {
+  border:2px dashed var(--fg); padding:48px 16px;
+  text-align:center; color:var(--muted-fg); font-size:14px;
+}
+
+/* ── 作者卡 ───────────────────────────────────────────── */
+.author-result-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px; margin-bottom:32px;
+}
+.author-result-card {
+  display:flex; align-items:center; gap:12px;
+  border:2px solid var(--fg); background:var(--card);
+  box-shadow: var(--shadow-orange);
+  padding:12px; cursor:pointer;
+  transition:transform .1s, box-shadow .1s;
+}
+.author-result-card:hover  { transform:translate(1px,1px); }
+.author-result-card:active { transform:translate(4px,4px); box-shadow:none; }
+.author-avatar-sm {
+  width:48px; height:48px; border:2px solid var(--fg);
+  flex-shrink:0; overflow:hidden;
+}
+.author-avatar-sm img { width:100%; height:100%; object-fit:cover; }
+.author-result-name { font-weight:700; font-size:14px; }
+.author-result-works { font-size:12px; color:var(--muted-fg); }
+
+/* ── 作者页 ───────────────────────────────────────────── */
+#author-info-card {
+  display:flex; align-items:flex-start; gap:16px;
+  border:2px solid var(--fg); background:var(--card);
+  box-shadow: var(--shadow-blue);
+  padding:20px; margin-bottom:28px;
+}
+#author-avatar-lg {
+  width:80px; height:80px; border:2px solid var(--fg);
+  flex-shrink:0; overflow:hidden;
+}
+#author-avatar-lg img { width:100%; height:100%; object-fit:cover; }
+#author-name { font-family:'优设标题黑'; font-size:clamp(20px,4vw,32px); font-weight:900; }
+.author-works-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  border:2px solid var(--fg); background:var(--accent);
+  padding:2px 10px; font-size:12px; font-weight:900; color:#fff;
+  margin:8px 0;
+}
+#author-bio { font-size:13px; color:var(--muted-fg); line-height:1.7; max-width:600px; }
+
+/* ── 详情页 ───────────────────────────────────────────── */
+#detail-grid {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:24px; margin-bottom:24px;
+}
+@media(min-width:640px){
+  #detail-grid { grid-template-columns:280px 1fr; }
+}
+#detail-cover-wrap {
+  position:relative; aspect-ratio:3/4; overflow:hidden;
+  border:2px solid var(--fg); background:var(--muted);
+  max-width:300px;
+}
+#detail-cover-wrap img { width:100%; height:100%; object-fit:cover; }
+#detail-rating-badge {
+  position:absolute; right:0; bottom:0;
+  border-top:2px solid var(--fg); border-left:2px solid var(--fg);
+  background:var(--primary); padding:5px 10px;
+  font-size:15px; font-weight:900; color:#fff;
+  display:flex; align-items:center; gap:4px;
+}
+#detail-info { min-width:0; }
+#detail-title {
+  font-family:'优设标题黑'; font-size:clamp(22px,4vw,34px); font-weight:900;
+  line-height:1.2; margin-bottom:12px;
+}
+#detail-author-link {
+  display:inline-flex; align-items:center; gap:6px;
+  border:2px solid var(--fg); background:var(--accent);
+  padding:5px 12px; font-size:13px; font-weight:700; color:#fff;
+  cursor:pointer; margin-bottom:12px;
+  transition:transform .1s, box-shadow .1s;
+  box-shadow: var(--shadow-orange);
+}
+#detail-author-link:hover  { transform:translate(1px,1px); }
+#detail-author-link:active { transform:translate(4px,4px); box-shadow:none; }
+#detail-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.detail-tag {
+  border:2px solid var(--fg); padding:2px 10px;
+  font-size:12px; font-weight:700;
+}
+#detail-stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  margin-bottom:16px;
+}
+.stat-box {
+  display:flex; flex-direction:column; align-items:center;
+  border:2px solid var(--fg); padding:8px;
+  text-align:center; gap:4px;
+}
+.stat-icon { color:var(--secondary); }
+.stat-label { font-size:10px; color:var(--muted-fg); }
+.stat-value { font-size:12px; font-weight:900; }
+.detail-score-wrap {
+  display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.score-badge {
+  display:flex; align-items:center; gap:4px;
+  border:2px solid var(--fg); background:var(--primary);
+  padding:5px 12px;
+}
+.score-badge .score-num {
+  font-family:'优设标题黑'; font-size:22px; font-weight:900; color:#fff;
+}
+.score-badge svg { color:#fff; }
+.score-count { font-size:12px; color:var(--muted-fg); }
+
+/* 详情区块 */
+.detail-section {
+  border:2px solid var(--fg); background:var(--card);
+  padding:18px; margin-bottom:16px;
+}
+.detail-section-title {
+  display:flex; align-items:center; gap:8px;
+  font-family:'优设标题黑'; font-size:17px; font-weight:900;
+  margin-bottom:12px;
+}
+.detail-desc { font-size:14px; line-height:1.8; color:var(--fg); }
+
+/* AI 评论 */
+.review-card {
+  border:2px solid var(--fg); background:var(--bg);
+  padding:12px; margin-bottom:10px;
+}
+.review-card:last-child { margin-bottom:0; }
+.review-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.reviewer-avatar {
+  width:36px; height:36px; border:2px solid var(--fg);
+  flex-shrink:0; overflow:hidden;
+}
+.reviewer-avatar img { width:100%; height:100%; object-fit:cover; }
+.reviewer-name { font-weight:700; font-size:13px; }
+.reviewer-meta { display:flex; align-items:center; gap:6px; font-size:11px; }
+.reviewer-rating { color:var(--primary); font-weight:900; display:flex; align-items:center; gap:2px; }
+.reviewer-date { color:var(--muted-fg); }
+.review-text { font-size:13px; line-height:1.7; }
+
+/* 进入故事按钮 */
+#enter-story-wrap { display:flex; justify-content:center; padding:16px 0 8px; }
+#enter-story-btn {
+  display:flex; align-items:center; gap:8px;
+  height:56px; padding:0 48px;
+  border:2px solid var(--fg); background:var(--primary); color:#fff;
+  font-family:'优设标题黑'; font-size:18px; font-weight:900;
+  cursor:pointer; box-shadow: var(--shadow-black);
+  transition:transform .1s, box-shadow .1s;
+}
+#enter-story-btn:hover  { transform:translate(1px,1px); box-shadow:3px 3px 0 0 var(--fg); }
+#enter-story-btn:active { transform:translate(4px,4px); box-shadow:none; }
+
+/* 返回按钮 */
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  border:2px solid var(--fg); background:transparent;
+  padding:7px 14px; font-size:13px; font-weight:700;
+  cursor:pointer; margin-bottom:20px;
+  transition:background .15s;
+}
+.back-btn:hover { background:var(--muted); }
+
+/* ── 页脚 ─────────────────────────────────────────────── */
+#footer {
+  border-top:2px solid var(--fg);
+  background:var(--card); margin-top:auto;
+}
+#footer .footer-inner {
+  display:flex; flex-direction:column; gap:20px;
+  padding:28px 16px;
+}
+@media(min-width:640px){
+  #footer .footer-inner { flex-direction:row; align-items:center; justify-content:space-between; }
+}
+.footer-logo { display:flex; align-items:center; gap:8px; }
+.footer-logo .logo-box {
+  width:32px; height:32px;
+  border:2px solid var(--fg); background:var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'优设标题黑'; font-size:16px; color:#fff; font-weight:900;
+}
+.footer-logo-text { font-family:'优设标题黑'; font-size:17px; font-weight:900; }
+.footer-desc { font-size:13px; color:var(--muted-fg); margin-top:8px; max-width:420px; line-height:1.6; }
+.footer-actions { display:flex; flex-wrap:wrap; gap:10px; flex-shrink:0; }
+.footer-copy {
+  border-top:2px dashed rgba(26,26,26,.2);
+  padding:12px 16px; text-align:center;
+  font-size:11px; color:var(--muted-fg);
+}
+
+/* ── 搜索结果页标题 ────────────────────────────────────── */
+.search-section-title {
+  font-family:'优设标题黑'; font-size:18px; font-weight:900;
+  margin:0 0 12px;
+}
+.search-results-header {
+  font-family:'优设标题黑'; font-size:clamp(17px,3vw,24px); font-weight:900;
+  margin-bottom:20px;
+}
+
+/* ── 响应式 ───────────────────────────────────────────── */
+@media(max-width:639px){
+  #nav-desktop { display:none; }
+  #menu-btn { display:flex; }
+  #logo .logo-text { font-size:15px; }
+  #search-wrap { max-width:none; }
+  #hero { padding:24px 16px; }
+  #author-info-card { flex-direction:column; }
+  #detail-grid { grid-template-columns:1fr; }
+  #detail-cover-wrap { max-width:220px; }
+  .story-grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+}
+@media(min-width:640px) and (max-width:767px){
+  .story-grid { grid-template-columns:repeat(3,1fr); }
+}
+@media(min-width:768px){
+  .container { padding:0 24px; }
+  .story-grid { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
+}
+@media(min-width:1024px){
+  .story-grid { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+}
+
+/* 表格/卡片溢出保护 */
+.overflow-x { overflow-x:auto; }
+</style>
+</head>
+<body>
+
+<!-- ══ 导航栏 ══════════════════════════════════════════ -->
+<header id="header">
+  <div class="container">
+    <div class="inner">
+      <!-- 移动菜单按钮 -->
+      <button id="menu-btn" class="btn btn-ghost" style="border:2px solid var(--fg);padding:6px;width:40px;height:40px;justify-content:center;" onclick="openMobileMenu()" aria-label="打开菜单">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+
+      <!-- Logo -->
+      <div id="logo" onclick="navigateTo('home')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')navigateTo('home')">
+        <div class="logo-box">七</div>
+        <span class="logo-text">七七剧本杀</span>
+      </div>
+
+      <!-- 搜索框 -->
+      <div id="search-wrap">
+        <div id="search-box">
+          <input id="search-input" type="text" placeholder="搜索故事名或作者"
+            oninput="handleSearchInput(this.value)"
+            onkeydown="if(event.key==='Enter')doSearch()"/>
+          <button id="search-btn" onclick="doSearch()" aria-label="搜索">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+        </div>
+        <div id="search-dropdown" class="hidden"></div>
+      </div>
+
+      <!-- 桌面导航 -->
+      <nav id="nav-desktop">
+        <button class="btn btn-ghost press" onclick="navigateTo('home')">首页</button>
+        <a href="https://www.77jbs.com/creator" target="_blank" rel="noopener noreferrer">
+          <button class="btn btn-primary press">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            创作者中心
+          </button>
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- ══ 移动端菜单遮罩 ════════════════════════════════════ -->
+<div id="mobile-overlay">
+  <div id="mobile-backdrop" onclick="closeMobileMenu()"></div>
+  <div id="mobile-drawer">
+    <div class="drawer-title">导航菜单</div>
+    <div class="mobile-nav-item press" onclick="navigateTo('home');closeMobileMenu()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      首页
+    </div>
+    <a href="https://www.77jbs.com/creator" target="_blank" rel="noopener noreferrer" onclick="closeMobileMenu()" style="text-decoration:none">
+      <div class="mobile-nav-item primary-item press">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        创作者中心
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ══ 主内容 ════════════════════════════════════════════ -->
+<main id="app">
+
+  <!-- ── 首页 ─────────────────────────────────────────── -->
+  <div id="page-home" class="page active">
+    <div class="container">
+
+      <!-- Hero -->
+      <section id="hero">
+        <div class="halftone"></div>
+        <div class="hero-content">
+          <div class="badge-hot">
+            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c0 6-8 8-8 14a8 8 0 0 0 16 0c0-6-8-8-8-14z"/></svg>
+            精选剧本杀故事
+          </div>
+          <h1>沉浸式剧本杀<span class="text-offset">故事中转站</span></h1>
+          <p>汇聚悬疑、恐怖、情感、古风等海量优质剧本，发现精彩剧情，一键进入七七剧本杀平台开始你的推理之旅。</p>
+          <div class="hero-btns">
+            <a href="https://www.77jbs.com/creator" target="_blank" rel="noopener noreferrer">
+              <button class="btn btn-primary press">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                创作者中心
+              </button>
+            </a>
+            <button class="btn btn-outline press" onclick="document.getElementById('category-section').scrollIntoView({behavior:'smooth'})">浏览全部</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 热门推荐 -->
+      <section style="margin-bottom:36px">
+        <div class="section-title">
+          <div class="bar" style="background:var(--primary)"></div>
+          <h2>热门推荐</h2>
+        </div>
+        <div class="story-grid" id="featured-grid"></div>
+      </section>
+
+      <!-- 分类浏览 -->
+      <section id="category-section" style="scroll-margin-top:80px">
+        <div class="section-title">
+          <div class="bar" style="background:var(--secondary)"></div>
+          <h2>分类浏览</h2>
+        </div>
+        <div id="category-bar"></div>
+        <div class="story-grid" id="category-grid"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ── 搜索结果页 ────────────────────────────────────── -->
+  <div id="page-search" class="page">
+    <div class="container">
+      <button class="back-btn press" onclick="navigateTo('home')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        返回首页
+      </button>
+      <p id="search-results-header" class="search-results-header"></p>
+      <div id="search-authors-section" class="hidden">
+        <p class="search-section-title">相关作者</p>
+        <div class="author-result-grid" id="search-authors-grid"></div>
+      </div>
+      <div id="search-stories-section" class="hidden">
+        <p class="search-section-title">相关故事</p>
+        <div class="story-grid" id="search-stories-grid"></div>
+      </div>
+      <div id="search-empty" class="hidden empty">
+        <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35M8 11h6"/></svg>
+        <p>未找到相关内容</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 作者页 ─────────────────────────────────────────── -->
+  <div id="page-author" class="page">
+    <div class="container">
+      <button class="back-btn press" onclick="navigateTo('home')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        返回首页
+      </button>
+      <div id="author-info-card">
+        <div id="author-avatar-lg"><img id="author-avatar-img" src="" alt="作者头像"/></div>
+        <div style="min-width:0;flex:1">
+          <h1 id="author-name"></h1>
+          <div class="author-works-badge" id="author-works-badge">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path stroke-linecap="round" d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span id="author-works-count"></span>部作品
+          </div>
+          <p id="author-bio"></p>
+        </div>
+      </div>
+      <div class="section-title">
+        <div class="bar" style="background:var(--primary)"></div>
+        <h2>全部作品</h2>
+      </div>
+      <div class="story-grid" id="author-works-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── 详情页 ─────────────────────────────────────────── -->
+  <div id="page-detail" class="page">
+    <div class="container">
+      <button class="back-btn press" onclick="goBack()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        返回
+      </button>
+      <!-- 封面+信息 -->
+      <div id="detail-main" class="detail-section shadow-pink" style="margin-bottom:20px">
+        <div id="detail-grid">
+          <div id="detail-cover-wrap">
+            <img id="detail-cover-img" src="" alt="故事封面"/>
+            <div id="detail-rating-badge">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <span id="detail-score-badge-num"></span>
+            </div>
+          </div>
+          <div id="detail-info">
+            <h1 id="detail-title"></h1>
+            <div id="detail-author-link" onclick="goToDetailAuthor()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')goToDetailAuthor()">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="7" r="4"/><path stroke-linecap="round" d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+              制作人：<span id="detail-author-name"></span>
+            </div>
+            <div id="detail-tags"></div>
+            <div id="detail-stats">
+              <div class="stat-box">
+                <svg class="stat-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="stat-label">人数</span><span class="stat-value" id="detail-players"></span>
+              </div>
+              <div class="stat-box">
+                <svg class="stat-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="stat-label">时长</span><span class="stat-value" id="detail-duration"></span>
+              </div>
+              <div class="stat-box">
+                <svg class="stat-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span class="stat-label">难度</span><span class="stat-value" id="detail-difficulty"></span>
+              </div>
+            </div>
+            <div class="detail-score-wrap">
+              <div class="score-badge">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="score-num" id="detail-score-num"></span>
+              </div>
+              <span class="score-count" id="detail-rating-count"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 故事简介 -->
+      <div class="detail-section shadow-blue">
+        <div class="detail-section-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--secondary)" stroke-width="2.5"><path stroke-linecap="round" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path stroke-linecap="round" d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          故事简介
+        </div>
+        <p class="detail-desc" id="detail-description"></p>
+      </div>
+
+      <!-- AI 试玩评论 -->
+      <div class="detail-section shadow-orange">
+        <div class="detail-section-title">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--secondary)" stroke-width="2.5"><path stroke-linecap="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          AI试玩评论
+        </div>
+        <div id="detail-reviews"></div>
+      </div>
+
+      <!-- 进入故事 -->
+      <div id="enter-story-wrap">
+        <a id="enter-story-link" href="#" target="_blank" rel="noopener noreferrer">
+          <button id="enter-story-btn">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            进入故事
+          </button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ 页脚 ════════════════════════════════════════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">
+          <div class="logo-box">七</div>
+          <span class="footer-logo-text">七七剧本杀故事游戏中转站</span>
+        </div>
+        <p class="footer-desc">汇聚优质剧本杀故事作品，发现精彩剧情，开启沉浸式推理体验。</p>
+      </div>
+      <div class="footer-actions">
+        <a href="https://www.77jbs.com/creator" target="_blank" rel="noopener noreferrer">
+          <button class="btn btn-outline press">创作者中心</button>
+        </a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2026 七七剧本杀中转站 · 本站为作品导航中转，游戏请前往七七剧本杀平台</div>
+  </div>
+</footer>
+
+<script>
+/* ══ 数据 ══════════════════════════════════════════════ */
+const AUTHORS = [
+  { id:'a1', name:'Seven戚',
+    avatar:'https://i.ibb.co/Y4rD6F2Y/b-8ee0f1b16f3c823eeff690735ca17e1f.jpg',
+    bio:'深耕悬疑推理剧本创作四年，擅长营造紧张氛围与反转剧情，作品多次登上平台热榜。',
+    worksCount:2 },
+  { id:'a2', name:'青衫客',
+    avatar:'https://miaoda-site-img.cdn.bcebos.com/images/MiaoTu_00894e32-f71a-4a52-9ba3-46d549a79fd4.jpg',
+    bio:'古风情感剧本专业作者，文字细腻动人，代表作《长安故人》系列广受好评。',
+    worksCount:5 },
+  { id:'a3', name:'夜行者',
+    avatar:'https://miaoda-site-img.cdn.bcebos.com/images/MiaoTu_f3efe0c9-e1b0-4599-b0c7-25af4e063c74.jpg',
+    bio:'恐怖题材鬼才，擅长心理惊悚与氛围营造，让玩家在尖叫中体验极致沉浸。',
+    worksCount:4 },
+  { id:'a4', name:'糖糖',
+    avatar:'https://miaoda-site-img.cdn.bcebos.com/images/MiaoTu_987b4859-b19f-43ed-bb6a-134d012ae96e.jpg',
+    bio:'欢乐轻松风格创作者，剧本节奏明快，适合朋友聚会破冰，笑点密集。',
+    worksCount:3 },
+];
+
+const CATEGORIES = [
+  {id:'all',name:'全部'},{id:'suspense',name:'悬疑'},{id:'horror',name:'恐怖'},
+  {id:'emotion',name:'情感'},{id:'joy',name:'欢乐'},{id:'history',name:'古风'},
+  {id:'scifi',name:'科幻'},{id:'campus',name:'校园'},
+];
+
+const STORIES = [
+  { id:'s1', title:'三角洲行动', authorId:'a1', authorName:'Seven戚',
+    cover:'https://ms.bdimg.com/pacific/0/pic/-1836811764_1010638820.png?x=0&y=0&h=320&w=480&vh=320.00&vw=480.00&oh=320.00&ow=480.00',
+    tags:['二创','游戏','角色扮演'], category:'suspense',
+    description:'你能否让时世界脱离战争的迷雾（本游戏为我的第一个测试作品）',
+    rating:6.3, ratingCount:1280, players:'单人', duration:'很短', difficulty:'新手', featured:true,
+    playUrl:'https://www.77jbs.com/story/s1',
+    reviews:[
+      { reviewer:'推理达人小K',
+        avatar:'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_00ad606c-3682-4fe8-9fc8-49694b7ea7d3.jpg',
+        rating:6.5, content:'三角洲行动真好玩。', date:'2026-07-30'},
+      { reviewer:'剧本杀老司机',
+        avatar:'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_10fd9f9e-66aa-4fb7-a795-126e13a49acf.jpg',
+        rating:9.2, content:'一般般，游戏很简单，轮椅霍金都能玩。', date:'2026-07-30'},
+    ]},
+  { id:'s2', title:'新编聊天群的诅咒', authorId:'a1', authorName:'Seven戚',
+    cover:'https://i.ibb.co/53P1WVd/QQ20260801-104052.png',
+    tags:['反转','诡异','探案'], category:'suspense',
+    description:'这个群里好像每个人都有自己的诅咒，你能帮助他们逃出梦魇吗?',
+    rating:9.1, ratingCount:980, players:'3人', duration:'较短', difficulty:'普通', featured:true,
+    playUrl:'https://www.77jbs.com/story/s2',
+    reviews:[
+      { reviewer:'模拟恐怖爱好者',
+        avatar:'https://miaoda-site-img.cdn.bcebos.com/images/MiaoTu_00894e32-f71a-4a52-9ba3-46d549a79fd4.jpg',
+        rating:9.3, content:'氛围制造的还好。', date:'2026-07-30'},
+    ]},
+];
+
+/* ══ 辅助函数 ════════════════════════════════════════════ */
+function getAuthorById(id){ return AUTHORS.find(a=>a.id===id); }
+function getStoryById(id){ return STORIES.find(s=>s.id===id); }
+function getStoriesByAuthor(authorId){ return STORIES.filter(s=>s.authorId===authorId); }
+function getStoriesByCategory(catId){ return catId==='all'?STORIES:STORIES.filter(s=>s.category===catId); }
+function getFeaturedStories(){ return STORIES.filter(s=>s.featured); }
+function searchAll(kw){
+  const k=kw.trim().toLowerCase();
+  if(!k) return {stories:[],authors:[]};
+  return {
+    stories: STORIES.filter(s=>s.title.toLowerCase().includes(k)||s.authorName.toLowerCase().includes(k)),
+    authors: AUTHORS.filter(a=>a.name.toLowerCase().includes(k)),
+  };
+}
+function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ══ 卡片 HTML ════════════════════════════════════════════ */
+function storyCardHTML(s, shadowClass='shadow-pink'){
+  const tagsHtml = s.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  return `
+  <div class="story-card ${shadowClass}" onclick="navigateToStory('${esc(s.id)}')" role="button" tabindex="0"
+       onkeydown="if(event.key==='Enter')navigateToStory('${esc(s.id)}')">
+    <div class="cover-wrap">
+      <img src="${esc(s.cover)}" alt="${esc(s.title)}" loading="lazy"/>
+      ${s.featured?'<div class="card-badge-hot">热门</div>':''}
+      <div class="card-rating">
+        <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        ${esc(s.rating)}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${esc(s.title)}</div>
+      <div class="card-author">制作：${esc(s.authorName)}</div>
+      <div class="card-tags">${tagsHtml}</div>
+      <div class="card-meta">
+        <span><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${esc(s.players)}</span>
+        <span><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${esc(s.duration)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ══ 路由系统 ═════════════════════════════════════════════ */
+// 路由映射
+const ROUTES = {
+  'home': { page: 'home', render: renderHome },
+  'search': { page: 'search', render: (params) => renderSearch(params.q || '') },
+  'author': { page: 'author', render: (params) => renderAuthor(params.id || '') },
+  'story': { page: 'detail', render: (params) => renderDetail(params.id || '') },
+};
+
+// 当前状态
+let currentRoute = 'home';
+let currentParams = {};
+
+// 导航历史（用于返回）
+let navHistory = [];
+
+// 解析 URL hash
+function parseHash() {
+  const hash = window.location.hash.slice(1) || 'home';
+  const [path, query] = hash.split('?');
+  const params = new URLSearchParams(query || '');
+  const obj = {};
+  params.forEach((v, k) => obj[k] = v);
+  return { path, params: obj };
+}
+
+// 更新 URL hash（不触发页面滚动）
+function updateHash(path, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const hash = path + (qs ? '?' + qs : '');
+  if (window.location.hash !== '#' + hash) {
+    history.pushState(null, '', '#' + hash);
+  }
+}
+
+// 导航到指定路由
+function navigateTo(route, params = {}, pushHistory = true) {
+  const config = ROUTES[route];
+  if (!config) return;
+
+  currentRoute = route;
+  currentParams = params;
+
+  // 更新 URL
+  updateHash(route, params);
+
+  // 显示页面
+  showPage(config.page);
+
+  // 渲染内容
+  config.render(params);
+
+  // 记录历史
+  if (pushHistory) {
+    navHistory.push({ route, params });
+  }
+
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 显示指定页面
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + pageId);
+  if (pg) pg.classList.add('active');
+
+  // 如果是首页，清除搜索框
+  if (pageId === 'home') {
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-dropdown').classList.add('hidden');
+  }
+}
+
+// 返回上一页
+function goBack() {
+  if (navHistory.length > 1) {
+    navHistory.pop(); // 移除当前页
+    const prev = navHistory[navHistory.length - 1];
+    if (prev) {
+      navigateTo(prev.route, prev.params, false);
+      return;
+    }
+  }
+  // 默认回到首页
+  navigateTo('home', {}, false);
+}
+
+// 处理 hash 变化
+function handleHashChange() {
+  const { path, params } = parseHash();
+  if (path !== currentRoute || JSON.stringify(params) !== JSON.stringify(currentParams)) {
+    // 如果路由有效，导航过去（不记录历史，因为 hash 变化本身已经是历史记录）
+    const config = ROUTES[path];
+    if (config) {
+      currentRoute = path;
+      currentParams = params;
+      showPage(config.page);
+      config.render(params);
+    } else {
+      // 无效路由，回到首页
+      navigateTo('home', {}, false);
+    }
+  }
+}
+
+/* ── 页面导航函数（供 HTML 调用） ───────────────────── */
+// 导航到故事详情
+function navigateToStory(storyId) {
+  navigateTo('story', { id: storyId });
+}
+
+// 导航到作者页
+function navigateToAuthor(authorId) {
+  navigateTo('author', { id: authorId });
+}
+
+// 导航到搜索页
+function navigateToSearch(keyword) {
+  navigateTo('search', { q: keyword });
+}
+
+// 从详情页跳转到作者
+function goToDetailAuthor() {
+  const authorId = _currentDetailAuthorId;
+  if (authorId) navigateToAuthor(authorId);
+}
+
+/* ══ 首页渲染 ═════════════════════════════════════════════ */
+let _activeCategory = 'all';
+
+function renderHome() {
+  // 热门推荐
+  const fg = document.getElementById('featured-grid');
+  fg.innerHTML = getFeaturedStories().map(s => storyCardHTML(s)).join('');
+
+  // 分类按钮
+  const cb = document.getElementById('category-bar');
+  cb.innerHTML = CATEGORIES.map(c => `
+    <button class="cat-btn press${c.id === _activeCategory ? ' active' : ''}"
+      onclick="selectCategory('${esc(c.id)}')">${esc(c.name)}</button>
+  `).join('');
+
+  // 分类列表
+  renderCategoryGrid();
+}
+
+function selectCategory(catId) {
+  _activeCategory = catId;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    const isActive = b.textContent === CATEGORIES.find(c => c.id === catId).name;
+    b.classList.toggle('active', isActive);
+  });
+  renderCategoryGrid();
+}
+
+function renderCategoryGrid() {
+  const grid = document.getElementById('category-grid');
+  const list = getStoriesByCategory(_activeCategory);
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">该分类暂无故事</div>';
+  } else {
+    grid.innerHTML = list.map(s => storyCardHTML(s, 'shadow-blue')).join('');
+  }
+}
+
+/* ══ 搜索 ════════════════════════════════════════════════ */
+function handleSearchInput(val) {
+  const dd = document.getElementById('search-dropdown');
+  if (!val.trim()) { dd.classList.add('hidden'); dd.innerHTML = ''; return; }
+  const { stories, authors } = searchAll(val);
+  const total = stories.length + authors.length;
+  if (total === 0) {
+    dd.innerHTML = '<div class="search-item" style="color:var(--muted-fg)">未找到相关内容</div>';
+  } else {
+    let html = '';
+    authors.slice(0, 3).forEach(a => {
+      html += `<div class="search-item" onclick="navigateToAuthor('${esc(a.id)}');document.getElementById('search-input').value='';document.getElementById('search-dropdown').classList.add('hidden')">
+        <span class="label">作者：${esc(a.name)}</span><span class="sub">(${esc(a.worksCount)}部作品)</span>
+      </div>`;
+    });
+    stories.slice(0, 5).forEach(s => {
+      html += `<div class="search-item" onclick="navigateToStory('${esc(s.id)}');document.getElementById('search-input').value='';document.getElementById('search-dropdown').classList.add('hidden')">
+        <span class="label">${esc(s.title)}</span><span class="sub">— ${esc(s.authorName)}</span>
+      </div>`;
+    });
+    dd.innerHTML = html;
+  }
+  dd.classList.remove('hidden');
+}
+
+function doSearch() {
+  const kw = document.getElementById('search-input').value;
+  document.getElementById('search-dropdown').classList.add('hidden');
+  if (!kw.trim()) return;
+  navigateToSearch(kw.trim());
+}
+
+// 点击外部关闭搜索下拉
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('search-wrap').contains(e.target)) {
+    document.getElementById('search-dropdown').classList.add('hidden');
+  }
+});
+
+/* ══ 搜索页渲染 ══════════════════════════════════════════ */
+function renderSearch(kw) {
+  const { stories, authors } = searchAll(kw);
+  document.getElementById('search-results-header').textContent = `搜索结果：「${kw}」`;
+  const noResult = stories.length === 0 && authors.length === 0;
+  document.getElementById('search-empty').classList.toggle('hidden', !noResult);
+
+  // 作者
+  const authorSec = document.getElementById('search-authors-section');
+  const authorGrid = document.getElementById('search-authors-grid');
+  if (authors.length > 0) {
+    authorSec.classList.remove('hidden');
+    authorGrid.innerHTML = authors.map(a => `
+      <div class="author-result-card press" onclick="navigateToAuthor('${esc(a.id)}')" role="button" tabindex="0">
+        <div class="author-avatar-sm"><img src="${esc(a.avatar)}" alt="${esc(a.name)}" loading="lazy"/></div>
+        <div><div class="author-result-name">${esc(a.name)}</div><div class="author-result-works">${esc(a.worksCount)}部作品</div></div>
+      </div>`).join('');
+  } else {
+    authorSec.classList.add('hidden');
+  }
+
+  // 故事
+  const storySec = document.getElementById('search-stories-section');
+  const storyGrid = document.getElementById('search-stories-grid');
+  if (stories.length > 0) {
+    storySec.classList.remove('hidden');
+    storyGrid.innerHTML = stories.map(s => storyCardHTML(s)).join('');
+  } else {
+    storySec.classList.add('hidden');
+  }
+}
+
+/* ══ 作者页渲染 ══════════════════════════════════════════ */
+let _currentDetailAuthorId = '';
+
+function renderAuthor(authorId) {
+  const a = getAuthorById(authorId);
+  if (!a) {
+    // 作者不存在，回到首页
+    navigateTo('home', {}, false);
+    return;
+  }
+  document.getElementById('author-avatar-img').src = a.avatar;
+  document.getElementById('author-avatar-img').alt = a.name;
+  document.getElementById('author-name').textContent = a.name;
+  document.getElementById('author-works-count').textContent = a.worksCount;
+  document.getElementById('author-bio').textContent = a.bio;
+
+  const works = getStoriesByAuthor(authorId);
+  const grid = document.getElementById('author-works-grid');
+  if (works.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">该作者暂无作品</div>';
+  } else {
+    grid.innerHTML = works.map(s => storyCardHTML(s, 'shadow-orange')).join('');
+  }
+}
+
+/* ══ 详情页渲染 ══════════════════════════════════════════ */
+function renderDetail(storyId) {
+  const s = getStoryById(storyId);
+  if (!s) {
+    // 故事不存在，回到首页
+    navigateTo('home', {}, false);
+    return;
+  }
+  _currentDetailAuthorId = s.authorId;
+
+  document.getElementById('detail-cover-img').src = s.cover;
+  document.getElementById('detail-cover-img').alt = s.title;
+  document.getElementById('detail-score-badge-num').textContent = s.rating;
+  document.getElementById('detail-title').textContent = s.title;
+  document.getElementById('detail-author-name').textContent = s.authorName;
+  document.getElementById('detail-players').textContent = s.players;
+  document.getElementById('detail-duration').textContent = s.duration;
+  document.getElementById('detail-difficulty').textContent = s.difficulty;
+  document.getElementById('detail-score-num').textContent = s.rating;
+  document.getElementById('detail-rating-count').textContent = s.ratingCount + '人评分';
+  document.getElementById('detail-description').textContent = s.description;
+
+  // 标签
+  document.getElementById('detail-tags').innerHTML =
+    s.tags.map(t => `<span class="detail-tag">${esc(t)}</span>`).join('');
+
+  // 进入故事
+  document.getElementById('enter-story-link').href = s.playUrl;
+
+  // 评论
+  const rev = document.getElementById('detail-reviews');
+  if (!s.reviews || s.reviews.length === 0) {
+    rev.innerHTML = '<p style="font-size:13px;color:var(--muted-fg)">暂无评论</p>';
+  } else {
+    rev.innerHTML = s.reviews.map(r => `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-avatar"><img src="${esc(r.avatar)}" alt="${esc(r.reviewer)}" loading="lazy"/></div>
+          <div>
+            <div class="reviewer-name">${esc(r.reviewer)}</div>
+            <div class="reviewer-meta">
+              <span class="reviewer-rating">
+                <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                ${esc(r.rating)}
+              </span>
+              <span class="reviewer-date">· ${esc(r.date)}</span>
+            </div>
+          </div>
+        </div>
+        <p class="review-text">${esc(r.content)}</p>
+      </div>`).join('');
+  }
+}
+
+/* ══ 移动菜单 ════════════════════════════════════════════ */
+function openMobileMenu() {
+  document.getElementById('mobile-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ══ 初始化 ════════════════════════════════════════════ */
+// 监听 hash 变化
+window.addEventListener('hashchange', handleHashChange);
+
+// 初始加载：解析 URL hash
+function init() {
+  const { path, params } = parseHash();
+  const config = ROUTES[path];
+  if (config) {
+    currentRoute = path;
+    currentParams = params;
+    showPage(config.page);
+    config.render(params);
+  } else {
+    // 无效路由，默认首页
+    navigateTo('home', {}, false);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
