@@ -1,0 +1,601 @@
+/**
+ * mobile-landscape.css
+ * 手机横屏适配样式
+ *
+ * 策略:
+ * - 使用 max-height 触发（横屏时高度较小）
+ * - 缩减 header / sidebar / dock 尺寸
+ * - 面板可折叠，画布占满剩余空间
+ * - 触控友好的控件尺寸
+ * - 设置弹窗全屏化
+ * - 处理移动端 100vh 问题
+ */
+
+/* ==================== 移动端基础变量 ==================== */
+
+@media (max-height: 500px) and (orientation: landscape),
+       (max-width: 900px) and (orientation: landscape) and (pointer: coarse) {
+
+  :root {
+    --workspace-header-height: 48px !important;
+    --sidebar-project-top-height: 48px !important;
+    --dock-top-offset: 6px !important;
+    --dock-inspector-offset: 0px !important;
+  }
+
+  /* 修复移动端 100vh 问题 */
+  html, body {
+    height: 100dvh !important;
+    height: 100vh;
+    overflow: hidden !important;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    height: 100dvh !important;
+  }
+
+  /* ==================== App Shell 布局 ==================== */
+
+  .app-shell {
+    grid-template-columns: 44px var(--sidebar-panel-width, 240px) minmax(0, 1fr) !important;
+    height: 100dvh !important;
+  }
+
+  .app-shell.outline-collapsed {
+    grid-template-columns: 44px 0 minmax(0, 1fr) !important;
+  }
+
+  /* 默认折叠侧边栏，让画布最大化 */
+  .app-shell:not(.outline-collapsed) {
+    grid-template-columns: 44px minmax(0, 200px) minmax(0, 1fr) !important;
+  }
+
+  /* ==================== 活动栏 (Activity Bar) ==================== */
+
+  .activity-bar {
+    width: 44px !important;
+    min-width: 44px !important;
+  }
+
+  .activity-bar button,
+  .activity-bar .activity-bar-item {
+    min-width: 44px !important;
+    width: 44px !important;
+    height: 40px !important;
+  }
+
+  .activity-bar svg,
+  .activity-bar img {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* ==================== 侧边栏 ==================== */
+
+  .sidebar-panel-wrap {
+    --sidebar-panel-width: 200px !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .sidebar-panel-wrap .sidebar-header,
+  .sidebar-panel-wrap .project-top {
+    min-height: 48px !important;
+    padding: 6px 10px !important;
+  }
+
+  .sidebar-panel-wrap .sidebar-header h1,
+  .sidebar-panel-wrap .project-top h1,
+  .sidebar-panel-wrap .sidebar-header .project-name {
+    font-size: 13px !important;
+  }
+
+  /* 侧边栏内容区缩小字体和间距 */
+  .sidebar-panel-wrap .file-tree-row {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+  }
+
+  .sidebar-panel-wrap .file-tree-row svg,
+  .sidebar-panel-wrap .file-tree-row img {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* 侧边栏拖拽手柄 */
+  .sidebar-resize-handle {
+    width: 4px !important;
+  }
+
+  .sidebar-resize-handle:after {
+    width: 2px !important;
+  }
+
+  /* 侧边栏折叠按钮 */
+  .sidebar-center-toggle {
+    transform: scale(0.8) !important;
+  }
+
+  /* ==================== 浮动 Dock ==================== */
+
+  .floating-dock {
+    min-height: 36px !important;
+    padding: 3px 4px !important;
+    gap: 2px !important;
+    right: 6px !important;
+    top: 4px !important;
+    max-width: min(calc(100% - 12px), 520px) !important;
+    border-radius: 999px !important;
+  }
+
+  .floating-dock .ghost-button,
+  .floating-dock .dock-icon-button,
+  .dock-collapse-button {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+  }
+
+  .floating-dock .ghost-button svg,
+  .floating-dock .dock-icon-button svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .dock-mode-toggle {
+    --dock-mode-width: 62px !important;
+    --dock-mode-height: 28px !important;
+    --dock-mode-thumb: 22px !important;
+    --dock-mode-pad: 3px !important;
+    --dock-mode-travel: 34px !important;
+  }
+
+  .dock-mode-toggle-icon svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Dock 标签文字隐藏，只显示图标 */
+  .floating-dock .dock-label,
+  .floating-dock .ghost-button span:not(.dock-icon) {
+    display: none !important;
+  }
+
+  /* ==================== 工作区 ==================== */
+
+  .workspace {
+    --dock-top-offset: 44px !important;
+  }
+
+  .workspace-document-tabs {
+    min-height: 36px !important;
+    padding: 4px 8px !important;
+    gap: 4px !important;
+  }
+
+  .workspace-document-tabs .workspace-tab,
+  .workspace-document-tabs button {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    min-height: 28px !important;
+  }
+
+  /* ==================== React Flow 画布 ==================== */
+
+  .react-flow__controls {
+    transform: scale(0.85) !important;
+    transform-origin: bottom left !important;
+  }
+
+  .react-flow__controls-button {
+    width: 22px !important;
+    height: 22px !important;
+    padding: 4px !important;
+  }
+
+  .react-flow__controls-button svg {
+    max-width: 14px !important;
+    max-height: 14px !important;
+  }
+
+  .react-flow__minimap {
+    transform: scale(0.7) !important;
+    transform-origin: bottom right !important;
+  }
+
+  .react-flow__attribution {
+    font-size: 8px !important;
+  }
+
+  .react-flow__node {
+    min-width: 100px !important;
+  }
+
+  .react-flow__node .node-card,
+  .react-flow__node .story-node {
+    font-size: 11px !important;
+  }
+
+  .react-flow__node .node-title {
+    font-size: 12px !important;
+  }
+
+  /* 画布触摸操作 */
+  .react-flow__pane {
+    touch-action: none !important;
+  }
+
+  .react-flow__node {
+    touch-action: manipulation !important;
+  }
+
+  /* ==================== 节点编辑面板 ==================== */
+
+  .inspector,
+  .outline-sidebar {
+    padding: 10px !important;
+  }
+
+  .inspector .inspector-section,
+  .outline-sidebar .outline-section {
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .inspector h2,
+  .inspector h3,
+  .outline-sidebar h2,
+  .outline-sidebar h3 {
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .inspector label,
+  .inspector .config-field label {
+    font-size: 11px !important;
+  }
+
+  .inspector input[type="text"],
+  .inspector input[type="number"],
+  .inspector textarea,
+  .inspector select {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+    min-height: 32px !important;
+  }
+
+  /* ==================== 设置弹窗 ==================== */
+
+  .settings-dialog-backdrop {
+    padding: 0 !important;
+  }
+
+  .settings-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .settings-dialog-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .settings-dialog-nav {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    padding: 6px 8px !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .settings-dialog-nav button {
+    white-space: nowrap !important;
+    min-height: 30px !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+  }
+
+  .settings-dialog-content {
+    padding: 14px 16px 20px !important;
+    gap: 14px !important;
+  }
+
+  .settings-dialog-content h2 {
+    font-size: 15px !important;
+  }
+
+  .settings-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+    padding: 8px 0 !important;
+  }
+
+  .settings-row strong {
+    font-size: 13px !important;
+  }
+
+  .settings-row p {
+    font-size: 11px !important;
+  }
+
+  .settings-close-button {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .settings-dialog-titlebar {
+    min-height: 40px !important;
+    padding: 0 10px 0 14px !important;
+  }
+
+  .settings-dialog-title {
+    font-size: 13px !important;
+  }
+
+  /* ==================== 对话框/弹窗通用 ==================== */
+
+  .minigame-manager-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+
+  .script-book-modal-backdrop {
+    padding: 4px !important;
+  }
+
+  .script-book-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  /* ==================== 底部托盘 ==================== */
+
+  .workbench-tray {
+    max-height: 50dvh !important;
+  }
+
+  .workbench-tray .tray-header {
+    min-height: 36px !important;
+    padding: 4px 10px !important;
+  }
+
+  /* ==================== Toast 提示 ==================== */
+
+  .toast-container,
+  .toast {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  /* ==================== 播放器/预览 ==================== */
+
+  .player-overlay,
+  .player-container {
+    padding: 8px !important;
+  }
+
+  .player-overlay .node-card,
+  .player-container .node-card {
+    padding: 14px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .player-overlay .node-title,
+  .player-container .node-title {
+    font-size: 1.1rem !important;
+  }
+
+  .player-overlay .option-btn,
+  .player-container .option-btn {
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    min-height: 40px !important;
+  }
+
+  .player-overlay .mg-iframe,
+  .player-container .mg-iframe {
+    height: 350px !important;
+  }
+
+  /* ==================== 滚动条 ==================== */
+
+  ::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px !important;
+  }
+
+  /* ==================== 表单控件 ==================== */
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 14px !important; /* 防止 iOS 自动放大 */
+  }
+
+  button {
+    touch-action: manipulation !important;
+  }
+
+  /* ==================== 项目导入加载 ==================== */
+
+  .project-import-loading-backdrop {
+    padding: 10px !important;
+  }
+
+  .project-import-loading-backdrop .loader {
+    transform: scale(0.8) !important;
+  }
+
+  /* ==================== 资产浏览器 ==================== */
+
+  .asset-browser,
+  .content-browser {
+    font-size: 12px !important;
+  }
+
+  .asset-browser .asset-card,
+  .content-browser .content-card {
+    padding: 6px !important;
+    min-height: 60px !important;
+  }
+
+  .asset-browser .asset-card img,
+  .content-browser .content-card img {
+    max-height: 50px !important;
+  }
+
+  /* ==================== 分镜面板 ==================== */
+
+  .storyboard-panel-block h1 {
+    font-size: 14px !important;
+  }
+
+  .storyboard-shot-list-header {
+    min-height: 36px !important;
+    padding: 4px 8px !important;
+  }
+
+  .storyboard-detail-panel {
+    padding: 8px !important;
+  }
+
+  /* ==================== 账户指示器适配 ==================== */
+
+  .auth-account-indicator {
+    top: 2px !important;
+    right: 2px !important;
+    z-index: 9500 !important;
+    padding: 3px 6px 3px 3px !important;
+  }
+
+  .auth-account-indicator .auth-account-avatar {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .auth-account-indicator .auth-account-name {
+    font-size: 10px !important;
+  }
+
+  .auth-account-indicator .auth-account-type {
+    display: none !important;
+  }
+
+  /* 让 Dock 避开账户指示器 */
+  .floating-dock {
+    right: 80px !important;
+    max-width: min(calc(100% - 90px), 400px) !important;
+  }
+
+  /* 退登弹窗适配 */
+  .auth-logout-dialog {
+    max-width: 280px !important;
+    padding: 16px !important;
+  }
+
+  .auth-logout-dialog h3 {
+    font-size: 14px !important;
+  }
+
+  .auth-logout-dialog p {
+    font-size: 12px !important;
+  }
+
+  .auth-logout-dialog .auth-btn {
+    height: 38px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* ==================== 超窄横屏 (≤ 480px 宽) ==================== */
+
+@media (max-width: 480px) and (orientation: landscape) and (pointer: coarse) {
+
+  .app-shell:not(.outline-collapsed) {
+    grid-template-columns: 40px minmax(0, 160px) minmax(0, 1fr) !important;
+  }
+
+  .floating-dock {
+    right: 70px !important;
+    max-width: min(calc(100% - 80px), 320px) !important;
+  }
+
+  .floating-dock .ghost-button,
+  .floating-dock .dock-icon-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+  }
+
+  .floating-dock .ghost-button svg,
+  .floating-dock .dock-icon-button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* 工作区标签栏更紧凑 */
+  .workspace-document-tabs {
+    padding: 2px 4px !important;
+  }
+
+  .workspace-document-tabs .workspace-tab,
+  .workspace-document-tabs button {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+  }
+}
+
+/* ==================== 竖屏手机提示 ==================== */
+
+@media (max-width: 760px) and (orientation: portrait) and (pointer: coarse) {
+
+  #root::before {
+    content: "请横屏使用编辑器 ↻";
+    position: fixed;
+    inset: 0;
+    z-index: 900000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0d1018 0%, #161024 50%, #0e1525 100%);
+    color: #e2e4e9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 40px;
+    animation: authFadeIn 0.3s ease;
+  }
+}
+
+/* 竖屏时隐藏认证门控的内容（但保留旋转提示） */
+@media (max-width: 760px) and (orientation: portrait) and (pointer: coarse) {
+  #auth-gate-overlay {
+    display: none !important;
+  }
+  .auth-account-indicator {
+    display: none !important;
+  }
+}
