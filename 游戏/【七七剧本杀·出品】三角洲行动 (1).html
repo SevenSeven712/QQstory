@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>三角洲行动</title>
+<style>
+:root{--bg:#0f1115;--card:#1a1d24;--border:#2a2e38;--text:#e2e4e9;--text-dim:#8b92a8;--accent:#5b8cff;--accent-dim:#3d5a99;--plot:#4ade80;--option:#fbbf24;--ending:#f87171;--minigame:#a78bfa}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;touch-action:manipulation}
+#game-root{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;max-width:720px;margin:0 auto;width:100%;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom));padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}
+.game-title{font-size:1.8rem;color:var(--text);margin-bottom:8px;text-align:center}
+.game-subtitle{color:var(--text-dim);font-size:0.95rem;margin-bottom:24px;text-align:center}
+.node-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;margin-bottom:16px;position:relative;overflow:hidden;animation:fadeIn .4s ease}
+.node-card.with-bg{background-size:cover;background-position:center;background-blend-mode:overlay}
+.node-card.with-bg::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:0}
+.node-card.with-bg.light-bg::before{background:rgba(255,255,255,.55)}
+.node-card.with-bg>*{position:relative;z-index:1}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.node-card.ending{border-color:rgba(248,113,113,.3)}
+.node-card.minigame{border-color:rgba(167,139,250,.3)}
+.node-type-badge{display:inline-block;font-size:0.7rem;font-weight:700;text-transform:uppercase;padding:3px 12px;border-radius:6px;margin-bottom:12px;background:rgba(90,222,128,.15);color:var(--plot)}
+.node-type-badge.ending{background:rgba(248,113,113,.15);color:var(--ending)}
+.node-type-badge.minigame{background:rgba(167,139,250,.15);color:var(--minigame)}
+.node-title{font-size:1.3rem;font-weight:600;margin-bottom:12px;color:var(--text)}
+.node-body{color:var(--text);white-space:pre-wrap;margin-bottom:16px;font-size:1rem;-webkit-user-select:text;user-select:text}
+.node-media{width:100%;border-radius:12px;margin-bottom:16px;max-height:400px;object-fit:contain;background:#000}
+.node-video{width:100%;border-radius:12px;margin-bottom:16px;max-height:400px;background:#000}
+/* 视觉小说式对话框 */
+.vn-dialogue-area{position:relative;margin-bottom:16px;min-height:60px}
+.vn-character-portrait{position:absolute;bottom:0;left:0;width:120px;height:160px;object-fit:contain;z-index:2;pointer-events:none;filter:drop-shadow(2px 4px 8px rgba(0,0,0,.4))}
+.vn-character-portrait.right{left:auto;right:0}
+.vn-dialogue-box{background:rgba(0,0,0,.65);border-radius:12px;padding:16px 20px;margin-left:0;position:relative;cursor:pointer;transition:background .2s;min-height:50px;display:flex;flex-direction:column;justify-content:center}
+.vn-dialogue-box.light-bg{background:rgba(255,255,255,.75);color:#1a1a2e}
+.vn-dialogue-box:hover{background:rgba(0,0,0,.72)}
+.vn-dialogue-box.light-bg:hover{background:rgba(255,255,255,.82)}
+.vn-dialogue-box.with-portrait-left{margin-left:130px}
+.vn-dialogue-box.with-portrait-right{margin-right:130px}
+.vn-speaker-name{font-size:0.9rem;font-weight:700;color:#a78bfa;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.vn-speaker-name::before{content:"";display:inline-block;width:3px;height:14px;background:#a78bfa;border-radius:2px}
+.vn-dialogue-box.light-bg .vn-speaker-name{color:#6d28d9}
+.vn-dialogue-box.light-bg .vn-speaker-name::before{background:#6d28d9}
+.vn-dialogue-text{font-size:1rem;line-height:1.8;white-space:pre-wrap;-webkit-user-select:text;user-select:text}
+.vn-dialogue-text.fade-in{animation:vnTextFade .35s ease}
+@keyframes vnTextFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.vn-advance-hint{text-align:right;font-size:0.75rem;color:rgba(255,255,255,.4);margin-top:6px;animation:vnBlink 1.2s infinite}
+.vn-dialogue-box.light-bg .vn-advance-hint{color:rgba(0,0,0,.35)}
+.mg-embed-wrap{position:relative;width:100%;margin-top:12px;touch-action:auto}
+.mg-iframe{width:100%;height:60vh;min-height:300px;max-height:600px;border:1px solid var(--border);border-radius:12px;background:#000;transition:opacity .3s ease;touch-action:auto}
+.mg-iframe.mg-done{opacity:.4;pointer-events:none}
+.mg-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:12px;color:var(--text-dim);font-size:.9rem}
+.mg-feedback{animation:mgPopIn .4s ease;text-align:center;padding:20px;border-radius:12px;font-size:1rem}
+@keyframes mgPopIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.mg-feedback .mg-fb-icon{font-size:2.5rem;margin-bottom:8px}
+.mg-feedback .mg-fb-title{font-size:1.4rem;font-weight:700}
+.mg-feedback .mg-fb-sub{font-size:.85rem;color:var(--text-dim);margin-top:6px}
+@keyframes vnBlink{0%,100%{opacity:.3}50%{opacity:.8}}
+.vn-paragraphs-done{opacity:.5;transition:opacity .3s}
+.options-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.option-btn{display:block;width:100%;text-align:left;padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:rgba(251,191,36,.06);color:var(--text);cursor:pointer;font-size:1rem;transition:all .2s;font-family:inherit;min-height:48px}
+.option-btn:hover{background:rgba(251,191,36,.12);border-color:var(--option);transform:translateX(4px)}
+.option-btn:active{transform:translateX(2px) scale(.99);background:rgba(251,191,36,.18)}
+.option-btn.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.option-title{font-weight:600;margin-bottom:2px}
+.option-body{color:var(--text-dim);font-size:0.9rem}
+.option-condition{font-size:0.75rem;color:var(--text-dim);margin-top:4px;font-style:italic}
+.no-options{color:var(--text-dim);text-align:center;padding:20px;font-style:italic}
+.ending-card{text-align:center;padding:40px 28px}
+.ending-card .node-title{font-size:1.6rem}
+.restart-btn{margin-top:24px;padding:14px 32px;border-radius:10px;border:1px solid var(--accent-dim);background:rgba(91,140,255,.1);color:var(--accent);cursor:pointer;font-size:1rem;transition:all .2s;font-family:inherit;min-height:48px}
+.restart-btn:hover{background:rgba(91,140,255,.2);border-color:var(--accent)}
+.restart-btn:active{background:rgba(91,140,255,.3);transform:scale(.98)}
+.history-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;justify-content:center}
+.history-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s}
+.history-dot.visited{background:var(--accent)}
+.vars-panel{position:fixed;top:16px;right:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:0.8rem;color:var(--text-dim);z-index:100;max-width:200px;display:none}
+.vars-panel.visible{display:block}
+.vars-panel .var-item{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}
+.vars-panel .var-name{color:var(--text)}
+.vars-panel .var-value{color:var(--accent)}
+.footer{text-align:center;padding:20px;color:var(--text-dim);font-size:0.8rem;border-top:1px solid var(--border)}
+.loading{color:var(--text-dim);text-align:center;padding:40px}
+.theme-toggle{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));z-index:100;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all .2s;min-height:40px}
+.theme-toggle:hover{border-color:var(--accent)}
+.theme-toggle:active{transform:scale(.95)}
+.download-btn{position:fixed;top:max(16px,env(safe-area-inset-top));left:calc(110px + env(safe-area-inset-left));z-index:100;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--accent);cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all .2s;min-height:40px}
+.download-btn:hover{border-color:var(--accent);background:rgba(91,140,255,.1)}
+.download-btn:active{transform:scale(.95)}
+@media(max-width:640px){
+  #game-root{padding:12px;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .node-card{padding:18px;border-radius:14px;margin-bottom:12px}
+  .game-title{font-size:1.4rem;margin-bottom:6px}
+  .game-subtitle{font-size:0.85rem;margin-bottom:18px}
+  .node-title{font-size:1.15rem;margin-bottom:10px}
+  .node-body{font-size:0.95rem;margin-bottom:14px}
+  .node-media,.node-video{max-height:260px;border-radius:10px;margin-bottom:14px}
+  .vn-dialogue-box{padding:14px 16px;border-radius:10px;min-height:48px}
+  .vn-dialogue-text{font-size:0.95rem;line-height:1.75}
+  .vn-speaker-name{font-size:0.85rem;margin-bottom:4px}
+  .vn-character-portrait{width:72px;height:100px}
+  .vn-dialogue-box.with-portrait-left{margin-left:82px}
+  .vn-dialogue-box.with-portrait-right{margin-right:82px}
+  .mg-iframe{height:55vh;min-height:280px;max-height:500px;border-radius:10px}
+  .mg-feedback{padding:16px}
+  .mg-feedback .mg-fb-icon{font-size:2rem}
+  .mg-feedback .mg-fb-title{font-size:1.2rem}
+  .options-list{gap:8px;margin-top:14px}
+  .option-btn{padding:12px 16px;font-size:0.95rem;min-height:44px;border-radius:10px}
+  .option-btn:hover{transform:none}
+  .option-btn:active{transform:scale(.98)}
+  .ending-card{padding:28px 18px}
+  .ending-card .node-title{font-size:1.35rem}
+  .restart-btn{padding:12px 28px;font-size:0.95rem;margin-top:18px}
+  .vars-panel{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));max-width:150px;font-size:0.7rem;padding:8px 10px}
+  .theme-toggle{top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));padding:6px 12px;font-size:0.75rem;min-height:36px}
+  .download-btn{top:max(8px,env(safe-area-inset-top));left:calc(88px + env(safe-area-inset-left));padding:6px 12px;font-size:0.75rem;min-height:36px}
+  .footer{padding:14px;font-size:0.72rem}
+  .history-dot{width:6px;height:6px}
+}
+@media(max-width:380px){
+  #game-root{padding:8px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .node-card{padding:14px;border-radius:12px}
+  .game-title{font-size:1.2rem}
+  .node-title{font-size:1.05rem}
+  .vn-dialogue-text{font-size:0.9rem}
+  .mg-iframe{height:50vh;min-height:240px;border-radius:8px}
+  .vn-character-portrait{width:60px;height:84px}
+  .vn-dialogue-box.with-portrait-left{margin-left:68px}
+  .vn-dialogue-box.with-portrait-right{margin-right:68px}
+  .vars-panel{display:none!important}
+}
+@media(orientation:landscape) and (max-height:500px){
+  #game-root{justify-content:flex-start;padding-top:max(8px,env(safe-area-inset-top))}
+  .mg-iframe{height:calc(100vh - 140px);min-height:200px;max-height:none}
+  .node-card{padding:14px 18px}
+  .game-title{font-size:1.1rem;margin-bottom:4px}
+  .game-subtitle{font-size:0.8rem;margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+<div id="game-root"></div>
+<div id="vars-panel" class="vars-panel"></div>
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" style="display:none">切换主题</button>
+
+<script id="project-data" type="application/json">{"variables":[{"id":"variable-1785321094728-0","name":"哈夫克","type":"int","initialValue":0},{"id":"variable-1785321100762-1","name":"阿萨拉","type":"int","initialValue":0}],"nodes":[{"id":"script-start","type":"start","position":{"x":178.66221628838474,"y":145.5153538050734},"data":{"kind":"start","title":"游戏入口","body":"欢迎游玩Seven戚通过“七七剧本杀”软件制作的互动故事剧情类游戏"}},{"id":"plot-1","type":"plot","position":{"x":607.9819314641744,"y":110.14828660436137},"data":{"kind":"plot","title":"起源","body":"这是一切的开始，阿萨拉的人民正处于水生火热之中，我们必须要帮助他们找回土地！！！！反对哈夫克的一切阴谋！","characterIds":["character-custom-1785322199210-1"],"storyboard":{"version":1,"storyboardId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"status":"confirmed","updatedAt":"2026-07-29T09:32:47.269Z","sourceHash":"ooxrei","shotCountReason":"","shots":[{"shotId":"shot-c90098a2-74d8-4584-8951-6c9841153ac0","shotNo":1,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"new_clip","linkLocked":false,"status":"confirmed"},{"shotId":"shot-12ba7ae8-3316-42a2-81bb-3f3144792e66","shotNo":2,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"auto","linkLocked":false,"status":"confirmed"}],"confirmedAt":"2026-07-29T09:32:47.269Z","estimatedCost":{"totalDurationSec":8,"costPerSecond":10,"totalCost":80,"updatedAt":"2026-08-01T06:28:00.365Z"}},"storyboardVersions":[{"id":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"storyboard":{"version":1,"storyboardId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"status":"confirmed","updatedAt":"2026-07-29T09:32:47.269Z","sourceHash":"ooxrei","shotCountReason":"","shots":[{"shotId":"shot-c90098a2-74d8-4584-8951-6c9841153ac0","shotNo":1,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"new_clip","linkLocked":false,"status":"confirmed"},{"shotId":"shot-12ba7ae8-3316-42a2-81bb-3f3144792e66","shotNo":2,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"auto","linkLocked":false,"status":"confirmed"}],"confirmedAt":"2026-07-29T09:32:47.269Z","estimatedCost":{"totalDurationSec":8,"costPerSecond":10,"totalCost":80,"updatedAt":"2026-08-01T06:28:00.365Z"}},"createdAt":"2026-07-29T09:28:19.403Z","updatedAt":"2026-07-29T09:32:47.269Z"}],"activeStoryboardVersionId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","mutations":[],"options":[{"id":"option-1785317857277-l1roxs","title":"帮助阿萨拉重建家园","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785320986814-rvycjo","title":"不管他们的事，我们GTI选择置身事外","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785321018225-cpakb9","title":"鼓励哈夫克","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"plot-3","type":"plot","position":{"x":1680,"y":120},"data":{"kind":"plot","title":"赛依德很感谢您","body":"”谢谢你”赛依德说道","characterIds":[],"mutations":[],"options":[{"id":"option-1785320827137-rbj5xd","title":"没事的，让我们一起加油吧！","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"plot-6","type":"plot","position":{"x":1160,"y":120},"data":{"kind":"plot","title":"阿萨拉的人民已经很苦了","body":"阿萨拉与哈夫克的战争，很显然哈夫克占据上风，雷军阀已经死了，如果帮助他们这个关键的地方（阿萨拉）就要被哈夫克占据了！","characterIds":[],"mutations":[],"options":[{"id":"option-1785321264141-17naps","title":"帮助阿萨拉","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785321265177-w3rhjz","title":"无视","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"ending-8","type":"ending","position":{"x":1160,"y":610.8571428571429},"data":{"kind":"ending","title":"哈夫克共创未来","body":"“信息与你无限，哈夫克共创未来！”哈夫克又送给我们GTI了一些脑机给我们的干员使用，我们相信与哈夫克合作，我们也将hui成为世界上新的阵营！","characterIds":[]}},{"id":"ending-10","type":"ending","position":{"x":1680,"y":542},"data":{"kind":"ending","title":"战争结束了","body":"战争让阿萨拉变的千疮百孔，哈夫克成为了世界的主导，他们占领着乌木斯运河的航道，他们收着巨额的资金，如果我们能够在之前阻止他们就好了······","characterIds":[]}},{"id":"ending-11","type":"ending","position":{"x":2200,"y":120},"data":{"kind":"ending","title":"阿萨拉的保卫战","body":"阿萨拉在GTI的xiezhu下已经战胜了邪恶的哈夫克资本家，我们会继续帮助他们重建家园！！！","characterIds":[]}}],"scripts":[{"scriptId":"script-default","name":"主脚本","entryNodeId":"script-start","nodes":[{"id":"script-start","type":"start","position":{"x":178.66221628838474,"y":145.5153538050734},"data":{"kind":"start","title":"游戏入口","body":"欢迎游玩Seven戚通过“七七剧本杀”软件制作的互动故事剧情类游戏"}},{"id":"plot-1","type":"plot","position":{"x":607.9819314641744,"y":110.14828660436137},"data":{"kind":"plot","title":"起源","body":"这是一切的开始，阿萨拉的人民正处于水生火热之中，我们必须要帮助他们找回土地！！！！反对哈夫克的一切阴谋！","characterIds":["character-custom-1785322199210-1"],"storyboard":{"version":1,"storyboardId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"status":"confirmed","updatedAt":"2026-07-29T09:32:47.269Z","sourceHash":"ooxrei","shotCountReason":"","shots":[{"shotId":"shot-c90098a2-74d8-4584-8951-6c9841153ac0","shotNo":1,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"new_clip","linkLocked":false,"status":"confirmed"},{"shotId":"shot-12ba7ae8-3316-42a2-81bb-3f3144792e66","shotNo":2,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"auto","linkLocked":false,"status":"confirmed"}],"confirmedAt":"2026-07-29T09:32:47.269Z","estimatedCost":{"totalDurationSec":8,"costPerSecond":10,"totalCost":80,"updatedAt":"2026-08-01T06:28:00.365Z"}},"storyboardVersions":[{"id":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"storyboard":{"version":1,"storyboardId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","revision":1,"status":"confirmed","updatedAt":"2026-07-29T09:32:47.269Z","sourceHash":"ooxrei","shotCountReason":"","shots":[{"shotId":"shot-c90098a2-74d8-4584-8951-6c9841153ac0","shotNo":1,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"new_clip","linkLocked":false,"status":"confirmed"},{"shotId":"shot-12ba7ae8-3316-42a2-81bb-3f3144792e66","shotNo":2,"durationSec":4,"gridPosition":null,"bottomCaptionEn":"","durationReason":"","sceneDescription":"","characterDescriptions":"","characterIds":["character-custom-1785322199210-1"],"visualDescription":"新的镜头画面","shotSize":"中景","cameraMovement":"固定机位","characterAction":"","emotion":"","lighting":"自然电影感光影","soundEffect":"","dialogue":"","generateAudio":true,"storyboardPrompt":"新的镜头画面\n出场人物：\nCharacter 1\n景别：中景\n光影：自然电影感光影","seedanceDirectorPrompt":"","motionPrompt":"运镜：固定机位\n时长：4秒","linkFromPrevious":"auto","linkLocked":false,"status":"confirmed"}],"confirmedAt":"2026-07-29T09:32:47.269Z","estimatedCost":{"totalDurationSec":8,"costPerSecond":10,"totalCost":80,"updatedAt":"2026-08-01T06:28:00.365Z"}},"createdAt":"2026-07-29T09:28:19.403Z","updatedAt":"2026-07-29T09:32:47.269Z"}],"activeStoryboardVersionId":"storyboard-version-821850fd-a752-4589-b3ab-06ebc5e53c64","mutations":[],"options":[{"id":"option-1785317857277-l1roxs","title":"帮助阿萨拉重建家园","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785320986814-rvycjo","title":"不管他们的事，我们GTI选择置身事外","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785321018225-cpakb9","title":"鼓励哈夫克","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"plot-3","type":"plot","position":{"x":1680,"y":120},"data":{"kind":"plot","title":"赛依德很感谢您","body":"”谢谢你”赛依德说道","characterIds":[],"mutations":[],"options":[{"id":"option-1785320827137-rbj5xd","title":"没事的，让我们一起加油吧！","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"plot-6","type":"plot","position":{"x":1160,"y":120},"data":{"kind":"plot","title":"阿萨拉的人民已经很苦了","body":"阿萨拉与哈夫克的战争，很显然哈夫克占据上风，雷军阀已经死了，如果帮助他们这个关键的地方（阿萨拉）就要被哈夫克占据了！","characterIds":[],"mutations":[],"options":[{"id":"option-1785321264141-17naps","title":"帮助阿萨拉","body":"","mutations":[],"conditions":[],"conditionGroups":[]},{"id":"option-1785321265177-w3rhjz","title":"无视","body":"","mutations":[],"conditions":[],"conditionGroups":[]}]}},{"id":"ending-8","type":"ending","position":{"x":1160,"y":610.8571428571429},"data":{"kind":"ending","title":"哈夫克共创未来","body":"“信息与你无限，哈夫克共创未来！”哈夫克又送给我们GTI了一些脑机给我们的干员使用，我们相信与哈夫克合作，我们也将hui成为世界上新的阵营！","characterIds":[]}},{"id":"ending-10","type":"ending","position":{"x":1680,"y":542},"data":{"kind":"ending","title":"战争结束了","body":"战争让阿萨拉变的千疮百孔，哈夫克成为了世界的主导，他们占领着乌木斯运河的航道，他们收着巨额的资金，如果我们能够在之前阻止他们就好了······","characterIds":[]}},{"id":"ending-11","type":"ending","position":{"x":2200,"y":120},"data":{"kind":"ending","title":"阿萨拉的保卫战","body":"阿萨拉在GTI的xiezhu下已经战胜了邪恶的哈夫克资本家，我们会继续帮助他们重建家园！！！","characterIds":[]}}],"edges":[{"id":"edge-2","source":"script-start","target":"plot-1","type":"smoothstep","color":"#78e0c4"},{"id":"edge-3","source":"plot-1","sourceOptionId":"option-1785317857277-l1roxs","target":"plot-3","type":"smoothstep","color":"#f7768e"},{"id":"edge-4","source":"plot-1","sourceOptionId":"option-1785320986814-rvycjo","target":"plot-6","type":"smoothstep","color":"#f7768e"},{"id":"edge-5","source":"plot-1","sourceOptionId":"option-1785321018225-cpakb9","target":"ending-8","type":"smoothstep","color":"#f7768e"},{"id":"edge-6","source":"plot-6","sourceOptionId":"option-1785321264141-17naps","target":"plot-3","type":"smoothstep","color":"#7cc7ff"},{"id":"edge-7","source":"plot-6","sourceOptionId":"option-1785321265177-w3rhjz","target":"ending-10","type":"smoothstep","color":"#7cc7ff"},{"id":"edge-8","source":"plot-3","sourceOptionId":"option-1785320827137-rbj5xd","target":"ending-11","type":"smoothstep","color":"#4dd0e1"}]}],"outline":{"projectTitle":"三角洲行动","world":"","scenes":"","characters":"","opening":"","openingPlot":"","tone":""},"assets":{"characters":[{"characterId":"character-custom-1785322199210-1","name":"Character 1","aliases":[],"personalityTags":[],"description":"","referenceImages":[],"variants":[]}],"scenes":[{"sceneId":"scene-custom-1785317488332-1","name":"Scene 1","description":"","referenceImages":[],"variants":[]}],"videos":[],"minigames":[]},"entryNodeId":"script-start","projectFlow":{"entryNodeId":"project-start","nodes":[{"id":"project-start","type":"start","position":{"x":120,"y":120},"data":{"kind":"start","title":"游戏入口","body":""}},{"id":"project-run-main","type":"runScript","position":{"x":420,"y":120},"data":{"kind":"runScript","title":"调用主脚本","body":"","scriptId":"script-default"}},{"id":"project-end","type":"scriptEnd","position":{"x":740,"y":120},"data":{"kind":"scriptEnd","title":"返回调用处","body":"","endId":"project-end"}}],"edges":[{"id":"project-edge-start-main","source":"project-start","target":"project-run-main","type":"smoothstep"},{"id":"project-edge-main-end","source":"project-run-main","sourceEndId":"end","target":"project-end","type":"smoothstep"}]}}</script>
+<script>
+(function(){
+  'use strict';
+
+  var ENDING_SETTINGS = {
+    showLockedEndings: true,
+    hideLockedEndingNames: false,
+    endingClues: {"ending-8":"与哈夫克结盟","ending-10":"中立","ending-11":"与阿萨拉结盟"},
+    publishSettings: {
+      hideEndingGallery: false,
+      hideVarsPanel: false,
+      hideRestartBtn: false,
+      hideTitleScreen: false,
+      hiddenVariables: [],
+      hiddenEndings: []
+    }
+  };
+  var EXPORT_FILE_NAME = "【七七剧本杀·出品】三角洲行动";
+  var reachedEndings = {}; // 记录已达成的结局
+  var ALL_ENDINGS = []; // 收集所有结局节点
+
+  // 导出的 HTML 中 project 参数不存在，只从 #project-data 读取
+  var domProject = null;
+  try {
+    var domEl = document.getElementById('project-data');
+    if (domEl) domProject = JSON.parse(domEl.textContent);
+  } catch(e) { console.error('[generateHTML] 解析 project-data 失败:', e); }
+  var PROJECT = domProject || {};
+  console.log('[generateHTML] 使用项目数据, 标题:', 
+    (PROJECT.outline && PROJECT.outline.projectTitle) || '(无)',
+    '小游戏资产:', (PROJECT.assets && PROJECT.assets.minigames) ? PROJECT.assets.minigames.length : 0);
+
+  // 收集所有节点和边（可能在顶层、scripts 或 projectFlow 中）
+  var nodes = [];
+  var edges = [];
+  // 从所有来源收集并合并变量数据
+  // 深度递归搜索：遍历整个项目数据树，查找所有看起来像变量的对象
+  var varMap = {};
+  function mergeVar(v) {
+    if (!v || !v.id || typeof v !== 'object') return;
+    // 必须看起来像变量对象：有 id 且有 type 或 initialValue 或 name
+    if (!('type' in v) && !('initialValue' in v) && !('name' in v)) return;
+    var existing = varMap[v.id];
+    if (!existing) {
+      varMap[v.id] = Object.assign({}, v);
+    } else {
+      // 合并：优先取非 undefined/null 的值
+      Object.keys(v).forEach(function(key) {
+        var newVal = v[key];
+        if (newVal !== undefined && newVal !== null) {
+          var oldVal = existing[key];
+          if (oldVal === undefined || oldVal === null) {
+            existing[key] = newVal;
+          } else if (key === 'initialValue') {
+            // 对于 initialValue：取非零的有效值
+            var oldNum = Number(oldVal);
+            var newNum = Number(newVal);
+            var oldValid = !isNaN(oldNum) && oldNum !== 0;
+            var newValid = !isNaN(newNum) && newNum !== 0;
+            // 如果旧值无效（0/空/NaN）而新值有效，用新值
+            if (!oldValid && newValid) {
+              existing[key] = newVal;
+            }
+            // 如果两个都有效，取绝对值更大的（通常是用户设置的值）
+            else if (oldValid && newValid && Math.abs(newNum) > Math.abs(oldNum)) {
+              existing[key] = newVal;
+            }
+            // 字符串类型的非零值优先
+            else if (typeof newVal === 'string' && newVal.trim() !== '' && newVal.trim() !== '0') {
+              if (typeof oldVal !== 'string' || oldVal.trim() === '' || oldVal.trim() === '0') {
+                existing[key] = newVal;
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // 深度递归搜索项目数据中的所有变量
+  function deepCollectVariables(obj, depth) {
+    if (!obj || typeof obj !== 'object' || depth > 10) return;
+    if (Array.isArray(obj)) {
+      obj.forEach(function(item) { deepCollectVariables(item, depth + 1); });
+      return;
+    }
+    // 检查是否是变量对象
+    if (obj.id && (obj.type === 'int' || obj.type === 'bool' || obj.type === 'enum') &&
+        ('initialValue' in obj || 'name' in obj)) {
+      mergeVar(obj);
+    }
+    // 递归搜索子属性
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key) && typeof obj[key] === 'object' && obj[key] !== null) {
+        deepCollectVariables(obj[key], depth + 1);
+      }
+    }
+  }
+
+  // 1. 先从已知位置收集
+  (PROJECT.variables || []).forEach(mergeVar);
+  if (PROJECT.scripts) {
+    PROJECT.scripts.forEach(function(s) {
+      (s.variables || []).forEach(mergeVar);
+    });
+  }
+  if (PROJECT.outline && PROJECT.outline.variables) {
+    PROJECT.outline.variables.forEach(mergeVar);
+  }
+  // 2. 深度递归搜索整个项目数据，确保不遗漏任何位置的变量
+  deepCollectVariables(PROJECT, 0);
+
+  var variables = Object.keys(varMap).map(function(k) { return varMap[k]; });
+
+  // 调试日志：帮助诊断变量同步问题
+  console.log('[变量同步诊断] 收集到变量:', variables.length, '个');
+  variables.forEach(function(v) {
+    console.log('[变量]', v.name, '(', v.id, ')', 'type:', v.type, 'initialValue:', v.initialValue);
+  });
+  var entryNodeId = PROJECT.entryNodeId;
+
+  // 顶层
+  if (PROJECT.nodes) nodes = nodes.concat(PROJECT.nodes);
+  if (PROJECT.edges) edges = edges.concat(PROJECT.edges);
+
+  // scripts 中的节点和边
+  if (PROJECT.scripts) {
+    PROJECT.scripts.forEach(function(s) {
+      if (s.nodes) nodes = nodes.concat(s.nodes);
+      if (s.edges) edges = edges.concat(s.edges);
+      if (s.entryNodeId && !entryNodeId) entryNodeId = s.entryNodeId;
+    });
+  }
+
+  // projectFlow 中的节点和边
+  if (PROJECT.projectFlow) {
+    if (PROJECT.projectFlow.nodes) nodes = nodes.concat(PROJECT.projectFlow.nodes);
+    if (PROJECT.projectFlow.edges) edges = edges.concat(PROJECT.projectFlow.edges);
+  }
+
+  // 去重（按 id）
+  var seenNodeIds = {};
+  nodes = nodes.filter(function(n) {
+    if (seenNodeIds[n.id]) return false;
+    seenNodeIds[n.id] = true;
+    return true;
+  });
+  var seenEdgeIds = {};
+  edges = edges.filter(function(e) {
+    if (seenEdgeIds[e.id]) return false;
+    seenEdgeIds[e.id] = true;
+    return true;
+  });
+
+  // 构建节点映射
+  var nodeMap = {};
+  nodes.forEach(function(n){ nodeMap[n.id] = n; });
+
+  // 构建小游戏资产映射（minigameAssetId -> 资产对象）
+  var minigameAssetMap = {};
+  if (PROJECT.assets && PROJECT.assets.minigames) {
+    PROJECT.assets.minigames.forEach(function(mg) {
+      if (mg && mg.minigameId) minigameAssetMap[mg.minigameId] = mg;
+    });
+  }
+  console.log('[小游戏资产] 共加载', Object.keys(minigameAssetMap).length, '个小游戏资产');
+
+  //从小游戏资产文件构建内联HTML（与主应用 tm() 函数逻辑一致）
+  function buildMinigameHtmlFromAsset(asset) {
+    if (!asset || !asset.files || !Array.isArray(asset.files)) return '';
+    // 查找 index.html
+    var entryFile = null;
+    for (var i = 0; i < asset.files.length; i++) {
+      if (asset.files[i].path === 'index.html') {
+        entryFile = asset.files[i];
+        break;
+      }
+    }
+    if (!entryFile) {
+      console.warn('[小游戏资产] 未找到 index.html');
+      return '';
+    }
+    // 解码 index.html 内容
+    var htmlContent = '';
+    try {
+      var binary = atob(entryFile.dataBase64 || '');
+      var bytes = new Uint8Array(binary.length);
+      for (var j = 0; j < binary.length; j++) bytes[j] = binary.charCodeAt(j);
+      htmlContent = new TextDecoder('utf-8').decode(bytes);
+    } catch(e) {
+      console.error('[小游戏资产] 解码 index.html 失败:', e);
+      return '';
+    }
+    // 构建文件路径 -> data URI 映射
+    var fileMap = {};
+    asset.files.forEach(function(f) {
+      if (f.path && f.dataBase64) {
+        fileMap[f.path] = 'data:' + (f.mimeType || 'application/octet-stream') + ';base64,' + f.dataBase64;
+      }
+    });
+    // 路径规范化函数
+    function normalizePath(p) {
+      var t = p.replace(/\\/g, '/').replace(/^\.\/+/, '').trim();
+      if (!t || t.endsWith('/') || t.startsWith('/') || /^[a-z]:\//i.test(t)) return null;
+      var parts = t.split('/').filter(Boolean);
+      if (parts.length === 0 || parts.some(function(p) { return p === '.' || p === '..' || p.indexOf(String.fromCharCode(0)) >= 0; })) return null;
+      return parts.join('/');
+    }
+    // 判断是否为绝对URL
+    function isAbsoluteUrl(s) {
+      return /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(s) || s.startsWith('data:') || s.startsWith('blob:');
+    }
+    // 分离路径和后缀（query+hash）
+    function splitPath(url) {
+      var m = url.match(/^([^?#]*)(.*)$/);
+      return { path: m ? m[1] : url, suffix: m ? m[2] : '' };
+    }
+    // 替换函数：将相对路径替换为 data URI
+    function replaceUrl(urlStr) {
+      var s = urlStr.trim();
+      if (!s || isAbsoluteUrl(s)) return urlStr;
+      var parts = splitPath(s);
+      var normalized = normalizePath(parts.path);
+      if (!normalized) return urlStr;
+      var dataUri = fileMap[normalized];
+      return dataUri ? (dataUri + parts.suffix) : urlStr;
+    }
+    // 替换 src="..." 和 href="..."
+    htmlContent = htmlContent.replace(/\b(src|href)=("([^"]*)"|'([^']*)')/gi, function(match, attr, quoted, dq, sq) {
+      var quote = quoted.startsWith("'") ? "'" : '"';
+      return attr + '=' + quote + replaceUrl(dq || sq || '') + quote;
+    });
+    // 替换 url(...)
+    htmlContent = htmlContent.replace(/url\((["']?)([^"')]+)\1\)/gi, function(match, quote, url) {
+      return 'url(' + quote + replaceUrl(url) + quote + ')';
+    });
+    console.log('[小游戏资产] HTML构建完成，长度:', htmlContent.length);
+    return htmlContent;
+  }
+
+  // 收集所有结局节点
+  nodes.forEach(function(n){
+    var kind = (n.data && n.data.kind) || n.type || '';
+    if(kind === 'ending'){
+      var endingData = n.data || {};
+      ALL_ENDINGS.push({
+        id: n.id,
+        title: endingData.title || endingData.name || '未知结局',
+        body: endingData.body || endingData.description || '',
+        clue: ENDING_SETTINGS.endingClues[n.id] || ''
+      });
+    }
+  });
+
+  // 构建出边映射：source -> [edges]
+  var outgoingMap = {};
+  edges.forEach(function(e){
+    if(!outgoingMap[e.source]) outgoingMap[e.source] = [];
+    outgoingMap[e.source].push(e);
+  });
+
+  // 初始化变量状态
+  // 编辑器使用 initialValue 字段，兼容 defaultValue / value / defaultVal
+  function getVarDefault(v){
+    // 优先使用 initialValue（编辑器实际使用的字段）
+    if(v.initialValue !== undefined && v.initialValue !== null && v.initialValue !== '') return v.initialValue;
+    // 兼容其他可能的字段名
+    if(v.defaultValue !== undefined && v.defaultValue !== null && v.defaultValue !== '') return v.defaultValue;
+    if(v.value !== undefined && v.value !== null && v.value !== '') return v.value;
+    if(v.defaultVal !== undefined && v.defaultVal !== null && v.defaultVal !== '') return v.defaultVal;
+    // 类型默认值
+    if(v.type === 'int') return 0;
+    if(v.type === 'bool') return false;
+    if(v.type === 'enum') return (v.enumOptions && v.enumOptions[0] && v.enumOptions[0].value) || '';
+    return '';
+  }
+  var variableState = {};
+  variables.forEach(function(v){
+    var val = getVarDefault(v);
+    if(v.type === 'int'){
+      val = Number(val);
+      if(isNaN(val)) val = 0;
+    }
+    else if(v.type === 'bool') val = val === true || val === 'true' || val === '1' || val === 1;
+    else if(v.type === 'enum') val = String(val || '');
+    variableState[v.id] = val;
+  });
+
+  var variableDefs = {};
+  variables.forEach(function(v){ variableDefs[v.id] = v; });
+
+  // 播放历史
+  var history = [];
+  var root = document.getElementById('game-root');
+  var varsPanel = document.getElementById('vars-panel');
+
+  // ==================== 媒体 URL 解析 ====================
+  function resolveMediaUrl(mediaObj){
+    if(!mediaObj || typeof mediaObj !== 'object') return null;
+    if(mediaObj._resolvedUrl) return mediaObj._resolvedUrl;
+    if(mediaObj.absoluteUrl) return mediaObj.absoluteUrl;
+    if(mediaObj.url && typeof mediaObj.url === 'string' && mediaObj.url.indexOf('blob:') !== 0) return mediaObj.url;
+    return null;
+  }
+
+  // ==================== 背景图片解析 ====================
+  function resolveBackgroundImage(node){
+    var data = node.data || {};
+    var bg = data.backgroundImage;
+    if(!bg) return null;
+    var url = null;
+    if(bg.type === 'url' && bg.url) url = bg.url;
+    else if(bg.type === 'base64' && bg.data) url = bg.data;
+    else if(bg.type === 'local' && bg.mediaId){
+      if(bg._resolvedUrl) url = bg._resolvedUrl;
+      else if(bg.absoluteUrl) url = bg.absoluteUrl;
+    }
+    else if(typeof bg === 'string') url = bg;
+    if(!url) return null;
+    // 返回 URL 和调整参数
+    return { url: url, adjust: bg.adjust || null };
+  }
+
+  // ==================== 人物肖像解析 ====================
+  function resolveCharacterPortrait(node){
+    var data = node.data || {};
+    var charIds = data.characterIds || [];
+    if(charIds.length === 0) return null;
+    var characters = PROJECT.assets && PROJECT.assets.characters || [];
+    var charId = charIds[0];
+    var character = characters.find(function(c){ return c.id === charId; });
+    if(!character) return null;
+    var portrait = character.portrait;
+    var portraitUrl = null;
+    if(portrait){
+      if(typeof portrait === 'string'){
+        portraitUrl = portrait;
+      } else {
+        portraitUrl = resolveMediaUrl(portrait);
+        if(!portraitUrl && portrait.data) portraitUrl = portrait.data;
+        if(!portraitUrl && portrait.base64) portraitUrl = portrait.base64;
+        if(!portraitUrl && portrait.thumbnail) portraitUrl = portrait.thumbnail;
+      }
+    }
+    return {
+      name: character.name || character.title || '未知人物',
+      portrait: portraitUrl,
+      id: charId
+    };
+  }
+
+  // ==================== 变量条件判断 ====================
+  function checkConditions(conditions){
+    if(!conditions || conditions.length === 0) return true;
+    return conditions.every(function(cond){
+      var def = variableDefs[cond.variableId];
+      var val = variableState[cond.variableId];
+      if(!def || val === undefined) return false;
+      if(def.type === 'bool'){
+        return cond.operator === 'false' ? !val : !!val;
+      }
+      if(def.type === 'enum'){
+        var cur = String(val || '');
+        var target = String(cond.value || '');
+        return cond.operator === 'not' ? cur !== target : cur === target;
+      }
+      var numVal = Number(val) || 0;
+      var numTarget = Number(cond.value) || 0;
+      switch(cond.operator){
+        case 'eq': return numVal === numTarget;
+        case 'ne': return numVal !== numTarget;
+        case 'gt': return numVal > numTarget;
+        case 'lt': return numVal < numTarget;
+        case 'gte': return numVal >= numTarget;
+        case 'lte': return numVal <= numTarget;
+        default: return true;
+      }
+    });
+  }
+
+  // ==================== 应用变量变更 ====================
+  function applyMutations(mutations){
+    if(!mutations || mutations.length === 0) return;
+    mutations.forEach(function(mut){
+      var def = variableDefs[mut.variableId];
+      if(!def) return;
+      var mode = mut.mode;
+      if(def.type === 'bool' || def.type === 'enum') mode = 'set';
+      if(mode !== 'add' && mode !== 'sub' && mode !== 'set') mode = 'set';
+
+      if(def.type === 'int'){
+        var cur = Number(variableState[mut.variableId]) || 0;
+        var val = Number(mut.value) || 0;
+        if(mode === 'add') variableState[mut.variableId] = cur + val;
+        else if(mode === 'sub') variableState[mut.variableId] = cur - val;
+        else variableState[mut.variableId] = val;
+      } else if(def.type === 'bool'){
+        variableState[mut.variableId] = mut.value === true || mut.value === 'true' || mut.value === '1' || mut.value === 1;
+      } else {
+        variableState[mut.variableId] = String(mut.value || '');
+      }
+    });
+    updateVarsPanel();
+  }
+
+  // ==================== 查找选项的目标节点 ====================
+  // 从 edge 中提取 sourceOptionId，兼容多种存储格式
+  function getEdgeSourceOptionId(e){
+    // 格式1: e.data.sourceOptionId (React Flow 格式)
+    if(e.data && e.data.sourceOptionId) return e.data.sourceOptionId;
+    // 格式2: e.sourceOptionId (存储格式)
+    if(e.sourceOptionId) return e.sourceOptionId;
+    // 格式3: e.sourceHandle = "option:<id>"
+    if(e.sourceHandle && typeof e.sourceHandle === 'string' && e.sourceHandle.indexOf('option:') === 0){
+      return e.sourceHandle.slice(7);
+    }
+    return null;
+  }
+
+  // 从 edge 中提取 sourceEndId，兼容多种存储格式
+  function getEdgeSourceEndId(e){
+    if(e.data && e.data.sourceEndId) return e.data.sourceEndId;
+    if(e.sourceEndId) return e.sourceEndId;
+    if(e.sourceHandle && typeof e.sourceHandle === 'string'){
+      if(e.sourceHandle.indexOf('script-end:') === 0) return e.sourceHandle.slice(12);
+      if(e.sourceHandle.indexOf('minigame-end:') === 0) return e.sourceHandle.slice(13);
+    }
+    return null;
+  }
+
+  function findOptionTarget(node, optionId, optIdx){
+    var outEdges = outgoingMap[node.id] || [];
+
+    // 策略1: 精确匹配 sourceOptionId
+    var edge = outEdges.find(function(e){
+      return getEdgeSourceOptionId(e) === optionId;
+    });
+
+    // 策略2: 匹配 sourceEndId
+    if(!edge){
+      edge = outEdges.find(function(e){
+        return getEdgeSourceEndId(e) === optionId;
+      });
+    }
+
+    // 策略3: 如果 optionId 是 "option-<idx>" 格式，解析索引并匹配
+    if(!edge && typeof optionId === 'string'){
+      var match = optionId.match(/option-(d+)/);
+      if(match){
+        var idx = parseInt(match[1], 10);
+        var options = node.data && node.data.options || [];
+        if(options[idx]){
+          edge = outEdges.find(function(e){
+            return getEdgeSourceOptionId(e) === options[idx].id || getEdgeSourceEndId(e) === options[idx].id;
+          });
+        }
+      }
+    }
+
+    // 策略4: 按选项索引匹配边（第 N 个有 optionId 的边对应第 N 个选项）
+    if(!edge && optIdx !== undefined && optIdx !== null){
+      var optionEdges = outEdges.filter(function(e){
+        return getEdgeSourceOptionId(e) !== null;
+      });
+      if(optionEdges.length > optIdx){
+        edge = optionEdges[optIdx];
+      }
+    }
+
+    return edge ? nodeMap[edge.target] : null;
+  }
+
+  // ==================== 查找节点的直接后续 ====================
+  function findNextNode(node){
+    var outEdges = outgoingMap[node.id] || [];
+    var edge = outEdges.find(function(e){
+      return getEdgeSourceOptionId(e) === null && getEdgeSourceEndId(e) === null;
+    });
+    if(!edge) edge = outEdges[0];
+    return edge ? nodeMap[edge.target] : null;
+  }
+
+  // ==================== 渲染变量面板 ====================
+  var _hiddenVarSet = {};
+  (ENDING_SETTINGS.publishSettings.hiddenVariables || []).forEach(function(vid){ _hiddenVarSet[vid] = true; });
+
+  function updateVarsPanel(){
+    if(ENDING_SETTINGS.publishSettings.hideVarsPanel || variables.length === 0){ varsPanel.classList.remove('visible'); return; }
+    var visibleVars = variables.filter(function(v){ return !_hiddenVarSet[v.id]; });
+    if(visibleVars.length === 0){ varsPanel.classList.remove('visible'); return; }
+    varsPanel.classList.add('visible');
+    var html = visibleVars.map(function(v){
+      var val = variableState[v.id];
+      if(v.type === 'int') val = Number(val) || 0;
+      return '<div class="var-item"><span class="var-name">' + escapeText(v.name || v.id) + '</span><span class="var-value">' + escapeText(String(val)) + '</span></div>';
+    }).join('');
+    varsPanel.innerHTML = html;
+  }
+
+  function escapeText(s){
+    if(typeof s !== 'string') s = String(s || '');
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ==================== 渲染节点 ====================
+  function renderNode(node){
+    if(!node){ renderEnd(); return; }
+
+    var data = node.data || {};
+    var kind = data.kind || node.type || 'plot';
+    var isEnding = kind === 'ending';
+    var isMinigame = kind === 'minigame';
+
+    history.push(node.id);
+
+    var card = document.createElement('div');
+    card.className = 'node-card' + (isEnding ? ' ending' : '') + (isMinigame ? ' minigame' : '');
+
+    // 应用背景图片
+    var bgInfo = resolveBackgroundImage(node);
+    var isLightBg = false;
+    if(bgInfo && bgInfo.url){
+      card.classList.add('with-bg');
+      card.style.backgroundImage = 'url(' + bgInfo.url + ')';
+      // 判断背景是否为亮色
+      if(data.backgroundImage && data.backgroundImage.bgTheme === 'light'){
+        card.classList.add('light-bg');
+        isLightBg = true;
+      }
+      // 应用可视化调整参数（缩放、偏移、裁剪）
+      var adj = bgInfo.adjust;
+      if(adj){
+        var bgSizeW = (adj.scale || 100) * 100 / (adj.cropW || 100);
+        var posX = 50;
+        var posY = 50;
+        // 裁剪位置映射
+        if((adj.cropW || 100) < 100){
+          posX = (adj.cropX || 0) * 100 / (100 - (adj.cropW || 100));
+        }
+        if((adj.cropH || 100) < 100){
+          posY = (adj.cropY || 0) * 100 / (100 - (adj.cropH || 100));
+        }
+        // 偏移调整
+        posX += (adj.offsetX || 0) / 2;
+        posY += (adj.offsetY || 0) / 2;
+        // 钳制范围
+        posX = Math.max(0, Math.min(100, posX));
+        posY = Math.max(0, Math.min(100, posY));
+        card.style.backgroundSize = bgSizeW + '% auto';
+        card.style.backgroundPosition = posX + '% ' + posY + '%';
+        card.style.backgroundRepeat = 'no-repeat';
+      }
+    }
+
+    var typeLabel = '剧情';
+    if(isEnding) typeLabel = '结局';
+    else if(isMinigame) typeLabel = '小游戏';
+
+    var html = '<span class="node-type-badge' + (isEnding ? ' ending' : '') + (isMinigame ? ' minigame' : '') + '">' + typeLabel + '</span>';
+
+    if(data.title){
+      html += '<div class="node-title">' + escapeText(data.title) + '</div>';
+    }
+
+    // 媒体展示（视频/图片）
+    var video = data.video || (data.storyboard && data.storyboard.videoJob ? data.storyboard.videoJob.video : null);
+    var mediaUrl = resolveMediaUrl(video);
+    if(mediaUrl){
+      var ext = mediaUrl.split('.').pop().toLowerCase().split('?')[0];
+      if(ext === 'mp4' || ext === 'webm' || ext === 'mov' || mediaUrl.indexOf('video') !== -1 || (mediaUrl.indexOf('data:video') === 0)){
+        html += '<video class="node-video" src="' + escapeText(mediaUrl) + '" controls autoplay playsinline></video>';
+      } else {
+        html += '<img class="node-media" src="' + escapeText(mediaUrl) + '" alt="">';
+      }
+    }
+
+    if(data.body){
+      // 视觉小说式分段展示：按换行符分割，点击切换下一段
+      var paragraphs = data.body.split(/\r?\n/).filter(function(p){ return p.trim().length > 0; });
+      if(paragraphs.length === 0) paragraphs = [data.body];
+
+      // 解析人物肖像
+      var charInfo = resolveCharacterPortrait(node);
+      var portraitSide = 'left';
+      var portraitHtml = '';
+      var boxClass = '';
+
+      if(charInfo && charInfo.portrait){
+        portraitHtml = '<img class="vn-character-portrait" src="' + escapeText(charInfo.portrait) + '" alt="' + escapeText(charInfo.name) + '">';
+        boxClass = ' with-portrait-' + portraitSide;
+      }
+
+      var dialogueClass = isLightBg ? ' light-bg' : '';
+      html += '<div class="vn-dialogue-area">';
+      html += portraitHtml;
+      html += '<div class="vn-dialogue-box' + boxClass + dialogueClass + '" id="vn-dialogue-' + node.id + '">';
+      if(charInfo && charInfo.name){
+        html += '<div class="vn-speaker-name">' + escapeText(charInfo.name) + '</div>';
+      }
+      html += '<div class="vn-dialogue-text" id="vn-text-' + node.id + '"></div>';
+      html += '<div class="vn-advance-hint" id="vn-hint-' + node.id + '">/ 点击继续</div>';
+      html += '</div>';
+      html += '</div>';
+    }
+
+    if(isEnding){
+      // 记录已达成的结局
+      reachedEndings[node.id] = true;
+
+      html += '</div>';
+      card.innerHTML = html;
+      card.classList.add('ending-card');
+      root.innerHTML = '';
+      root.appendChild(card);
+
+      // 结局也需要显示正文
+      var endTextEl = card.querySelector('#vn-text-' + node.id);
+      var endHintEl = card.querySelector('#vn-hint-' + node.id);
+      var endDialogueBox = card.querySelector('#vn-dialogue-' + node.id);
+      var endParagraphs = [];
+      if(data.body){
+        endParagraphs = data.body.split(/\r?\n/).filter(function(p){ return p.trim().length > 0; });
+        if(endParagraphs.length === 0) endParagraphs = [data.body];
+      }
+
+      if(endTextEl && endParagraphs.length > 0){
+        var endParaIdx = 0;
+        var endDone = false;
+
+        function showEndingParagraph(){
+          if(endParaIdx >= endParagraphs.length){
+            if(!endDone){
+              endDone = true;
+              if(endHintEl) endHintEl.style.display = 'none';
+              showEndingButtons();
+            }
+            return;
+          }
+          var para = endParagraphs[endParaIdx];
+          endTextEl.classList.remove('fade-in');
+          endTextEl.textContent = para;
+          void endTextEl.offsetWidth;
+          endTextEl.classList.add('fade-in');
+          endParaIdx++;
+          if(endParaIdx >= endParagraphs.length){
+            if(endParagraphs.length <= 1){
+              endDone = true;
+              if(endHintEl) endHintEl.style.display = 'none';
+              showEndingButtons();
+              return;
+            }
+            if(endHintEl) endHintEl.textContent = '/ 点击继续';
+          } else {
+            if(endHintEl) endHintEl.textContent = '/ 点击继续 (' + endParaIdx + '/' + endParagraphs.length + ')';
+          }
+        }
+
+        showEndingParagraph();
+        if(endDialogueBox){
+          endDialogueBox.addEventListener('click', function(){
+            if(endDone) return;
+            showEndingParagraph();
+          });
+        }
+      } else {
+        // 没有正文，直接显示按钮
+        if(endHintEl) endHintEl.style.display = 'none';
+        showEndingButtons();
+      }
+
+      function showEndingButtons(){
+        if(!ENDING_SETTINGS.publishSettings.hideRestartBtn){
+          var restart = document.createElement('button');
+          restart.className = 'restart-btn';
+          restart.textContent = '重新开始';
+          restart.onclick = function(){ startGame(); };
+          root.appendChild(restart);
+        }
+
+        if(!ENDING_SETTINGS.publishSettings.hideEndingGallery){
+          var endingBtn = document.createElement('button');
+          endingBtn.className = 'restart-btn';
+          endingBtn.style.marginTop = '8px';
+          endingBtn.textContent = '结局查询';
+          endingBtn.onclick = function(){ showEndingGallery(); };
+          root.appendChild(endingBtn);
+        }
+      }
+      return;
+    }
+
+    // 选项渲染（初始隐藏，等段落读完再显示）
+    var hasOptions = false;
+    if(kind === 'plot' && data.options && data.options.length > 0){
+      hasOptions = true;
+      html += '<div class="options-list vn-options" style="display:none">';
+      data.options.forEach(function(opt, idx){
+        var condMet = checkConditions(opt.conditions);
+        var optId = opt.id || ('option-' + idx);
+        html += '<button class="option-btn' + (condMet ? '' : ' disabled') + '" data-opt-id="' + escapeText(optId) + '" data-opt-idx="' + idx + '"' + (condMet ? '' : ' disabled') + '>';
+        html += '<div class="option-title">' + escapeText(opt.title || ('选项 ' + (idx + 1))) + '</div>';
+        if(opt.body) html += '<div class="option-body">' + escapeText(opt.body) + '</div>';
+        if(opt.conditions && opt.conditions.length > 0 && !condMet) html += '<div class="option-condition">条件未满足</div>';
+        html += '</button>';
+      });
+      html += '</div>';
+    } else if(kind === 'minigame'){
+      // 小游戏嵌入渲染
+      var mgEmbedType = data.minigameEmbedType || '';
+      var mgHtmlCode = data.minigameHtmlCode || '';
+      var mgGameUrl = data.minigameUrl || '';
+
+      // 检查是否使用资产面板的小游戏资源（minigameAssetId）
+      var mgAssetId = data.minigameAssetId || '';
+      var mgAsset = mgAssetId ? minigameAssetMap[mgAssetId] : null;
+      if(mgAsset){
+        // 从资产构建内联HTML
+        var assetHtml = buildMinigameHtmlFromAsset(mgAsset);
+        if(assetHtml){
+          mgEmbedType = 'html';
+          mgHtmlCode = assetHtml;
+          console.log('[小游戏诊断] 节点', node.id, '使用资产', mgAssetId, '(', mgAsset.name, ')，HTML长度:', assetHtml.length);
+        } else {
+          console.warn('[小游戏诊断] 节点', node.id, '资产', mgAssetId, '构建HTML失败');
+        }
+      }
+
+      var hasEmbed = (mgEmbedType === 'html' && mgHtmlCode) || (mgEmbedType === 'url' && mgGameUrl);
+
+      // 诊断日志：帮助排查小游戏嵌入问题
+      console.log('[小游戏诊断] 节点', node.id, {
+        kind: kind,
+        minigameEmbedType: mgEmbedType,
+        hasHtmlCode: !!mgHtmlCode,
+        htmlCodeLength: mgHtmlCode ? mgHtmlCode.length : 0,
+        hasUrl: !!mgGameUrl,
+        url: mgGameUrl,
+        hasEmbed: !!hasEmbed,
+        dataKeys: Object.keys(data)
+      });
+
+      if(hasEmbed){
+        // 嵌入型小游戏：渲染iframe容器（玩家直接看到游戏，不需要选择）
+        hasOptions = true;
+        html += '<div class="mg-embed-wrap vn-options" style="display:none">';
+        html += '<div class="mg-loading">小游戏加载中...</div>';
+        if(mgEmbedType === 'html'){
+          // HTML代码模式：用Blob URL确保内容完整渲染
+          html += '<iframe class="mg-iframe" data-mg-mode="html" data-mg-code="' + escapeText(mgHtmlCode) + '" style="display:none;" allow="autoplay; fullscreen; microphone; camera"></iframe>';
+        } else {
+          // URL模式：直接加载URL
+          html += '<iframe class="mg-iframe" data-mg-mode="url" src="' + escapeText(mgGameUrl) + '" style="display:none;" allow="autoplay; fullscreen; microphone; camera"></iframe>';
+        }
+        html += '<div class="mg-feedback" style="display:none;margin-top:12px;"></div>';
+        html += '</div>';
+      } else {
+        // 无嵌入内容：显示提示信息，不显示选择按钮
+        // 结果定义仅用于作者端配置连线，玩家不应看到选择按钮
+        hasOptions = true;
+        var results = data.minigameResults || [{ id: 'success', label: '成功' }, { id: 'failure', label: '失败' }];
+        html += '<div class="mg-embed-wrap vn-options" style="display:none">';
+        html += '<div style="padding:40px 20px;text-align:center;color:var(--text-dim);background:rgba(167,139,250,.08);border-radius:12px;border:1px dashed rgba(167,139,250,.3);">';
+        html += '<div style="font-size:2rem;margin-bottom:8px;">🎮</div>';
+        html += '<div style="font-size:1rem;margin-bottom:12px;">小游戏未配置嵌入内容</div>';
+        html += '<div style="font-size:0.85rem;">请在编辑器中配置小游戏嵌入（HTML代码或URL）</div>';
+        html += '</div>';
+        // 仍保留隐藏的结果按钮供测试用（不可见但可点击）
+        results.forEach(function(r){
+          html += '<button class="option-btn" data-result-id="' + escapeText(r.id) + '" style="display:none;">';
+          html += '<div class="option-title">' + escapeText(r.label || r.id) + '</div>';
+          html += '</button>';
+        });
+        html += '</div>';
+      }
+    } else {
+      var nextNode = findNextNode(node);
+      html += '<div class="no-options vn-options" style="display:none">';
+      if(nextNode){
+        html += '（继续...）';
+      } else {
+        html += '没有后续剧情了';
+      }
+      html += '</div>';
+    }
+
+    html += '</div>';
+    card.innerHTML = html;
+    root.innerHTML = '';
+    root.appendChild(card);
+
+    // ===== 视觉小说式段落渐进展示 =====
+    var dialogueBox = card.querySelector('#vn-dialogue-' + node.id);
+    var textEl = card.querySelector('#vn-text-' + node.id);
+    var hintEl = card.querySelector('#vn-hint-' + node.id);
+    var optionsEl = card.querySelector('.vn-options');
+    var paraIdx = 0;
+    var allParagraphsShown = false;
+
+    function showOptions(){
+      if(optionsEl){
+        optionsEl.style.display = '';
+        optionsEl.classList.add('vn-paragraphs-done');
+      }
+      if(hintEl) hintEl.style.display = 'none';
+      allParagraphsShown = true;
+
+      // 如果没有选项且有下一个节点，自动跳转
+      if(!hasOptions){
+        var autoNext = findNextNode(node);
+        if(autoNext){
+          setTimeout(function(){ renderNode(autoNext); }, 800);
+        }
+      }
+    }
+
+    function showNextParagraph(){
+      if(!textEl || !paragraphs || paraIdx >= paragraphs.length){
+        if(!allParagraphsShown) showOptions();
+        return;
+      }
+      var para = paragraphs[paraIdx];
+      // 文字切换动画：先移除动画类，设置文字，再触发动画
+      textEl.classList.remove('fade-in');
+      textEl.textContent = para;
+      // 强制 reflow 以重新触发动画
+      void textEl.offsetWidth;
+      textEl.classList.add('fade-in');
+      paraIdx++;
+      if(paraIdx >= paragraphs.length){
+        // 如果只有一个段落，直接显示选项，不需要再点"继续"
+        if(paragraphs.length <= 1){
+          showOptions();
+          return;
+        }
+        if(hintEl) hintEl.textContent = '/ 点击继续';
+        // 延迟显示选项，让用户读完最后一段
+        if(dialogueBox){
+          dialogueBox.addEventListener('click', function(){
+            if(!allParagraphsShown) showOptions();
+          }, { once: true });
+        }
+      } else {
+        if(hintEl) hintEl.textContent = '/ 点击继续 (' + paraIdx + '/' + paragraphs.length + ')';
+      }
+    }
+
+    // 嵌入型小游戏：直接显示游戏iframe，跳过文字展示
+    var isEmbeddedMinigame = kind === 'minigame' && hasEmbed;
+
+    if(isEmbeddedMinigame){
+      // 隐藏对话区域，直接显示游戏
+      if(dialogueBox) dialogueBox.style.display = 'none';
+      if(hintEl) hintEl.style.display = 'none';
+      showOptions();
+      // 嵌入型小游戏不需要半透明效果，移除 vn-paragraphs-done 类
+      if(optionsEl) optionsEl.classList.remove('vn-paragraphs-done');
+
+      // 初始化iframe：三级降级加载（Blob URL → data URI → srcdoc → 降级按钮）
+      var mgIframe = card.querySelector('.mg-iframe');
+      var mgLoading = card.querySelector('.mg-loading');
+      var mgEmbedWrap = card.querySelector('.mg-embed-wrap');
+
+      // 降级按钮：所有加载方式失败时显示，让玩家跳过小游戏
+      function showFallbackButton(){
+        console.log('[小游戏] 所有加载方式失败，显示降级按钮');
+        if(mgIframe) mgIframe.style.display = 'none';
+        if(mgLoading) mgLoading.style.display = 'none';
+
+        // 查找 success 边指向的节点
+        var outEdges = outgoingMap[node.id] || [];
+        var successEdge = null;
+        for(var i = 0; i < outEdges.length; i++){
+          if(getEdgeSourceEndId(outEdges[i]) === 'success'){ successEdge = outEdges[i]; break; }
+        }
+        if(!successEdge){
+          for(var j = 0; j < outEdges.length; j++){
+            if(getEdgeSourceEndId(outEdges[j]) === null && getEdgeSourceOptionId(outEdges[j]) === null){ successEdge = outEdges[j]; break; }
+          }
+        }
+        if(!successEdge && outEdges.length > 0) successEdge = outEdges[0];
+        var fallbackNode = successEdge ? nodeMap[successEdge.target] : null;
+
+        var fallbackDiv = document.createElement('div');
+        fallbackDiv.className = 'mg-fallback';
+        fallbackDiv.style.cssText = 'padding:40px 20px;text-align:center;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:12px;cursor:pointer;transition:background .2s;';
+        fallbackDiv.innerHTML = '<div style="font-size:2rem;margin-bottom:8px;">🎮</div>' +
+          '<div style="font-size:1rem;font-weight:600;color:var(--minigame,#a78bfa);margin-bottom:4px;">小游戏无法加载</div>' +
+          '<div style="font-size:0.85rem;color:var(--text-dim,#8b92a8);margin-bottom:16px;">点击此处跳过小游戏，继续剧情</div>' +
+          '<button style="padding:10px 24px;border-radius:8px;border:1px solid var(--minigame,#a78bfa);background:transparent;color:var(--minigame,#a78bfa);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">点击此处继续剧情</button>';
+
+        fallbackDiv.addEventListener('click', function(){
+          if(mgFinished) return;
+          mgFinished = true;
+
+          // 显示反馈
+          var fbEl = card.querySelector('.mg-feedback');
+          if(fbEl){
+            fbEl.style.display = '';
+            fbEl.style.background = 'rgba(167,139,250,.12)';
+            fbEl.style.border = '1px solid rgba(167,139,250,.3)';
+            fbEl.innerHTML = '<div class="mg-fb-icon">⏭️</div>' +
+              '<div class="mg-fb-title" style="color:var(--minigame,#a78bfa)">已跳过小游戏</div>' +
+              '<div class="mg-fb-sub">即将继续剧情...</div>';
+          }
+
+          // 清理 postMessage 监听器
+          if(window._vnMgHandler){
+            window.removeEventListener('message', window._vnMgHandler);
+            window._vnMgHandler = null;
+          }
+
+          // 跳转到后续节点
+          setTimeout(function(){
+            if(fallbackNode){
+              renderNode(fallbackNode);
+            } else {
+              renderEnd();
+            }
+          }, 1500);
+        });
+
+        if(mgEmbedWrap){
+          mgEmbedWrap.appendChild(fallbackDiv);
+        } else {
+          card.appendChild(fallbackDiv);
+        }
+      }
+
+      if(mgIframe && mgIframe.getAttribute('data-mg-mode') === 'html'){
+        // HTML代码模式：三级降级加载
+        var rawCode = mgIframe.getAttribute('data-mg-code') || '';
+        console.log('[小游戏iframe] HTML模式，代码长度:', rawCode.length);
+        var mgLoadSuccess = false;
+        var mgLoadTimer = null;
+
+        // 方法1: Blob URL（兼容安卓）
+        function tryBlobUrl(){
+          console.log('[小游戏] 尝试 Blob URL 加载');
+          try {
+            var blob = new Blob([rawCode], { type: 'text/html;charset=utf-8' });
+            var blobUrl = URL.createObjectURL(blob);
+            mgLoadSuccess = false;
+            mgIframe.onload = function(){
+              mgLoadSuccess = true;
+              if(mgLoadTimer) clearTimeout(mgLoadTimer);
+              console.log('[小游戏] Blob URL 加载成功');
+            };
+            mgIframe.src = blobUrl;
+            mgIframe.style.display = '';
+            if(mgLoading) mgLoading.style.display = 'none';
+
+            // 2秒后检测是否加载成功
+            mgLoadTimer = setTimeout(function(){
+              if(!mgLoadSuccess){
+                console.log('[小游戏] Blob URL 2秒未加载成功，降级为 data URI');
+                try { URL.revokeObjectURL(blobUrl); } catch(e) {}
+                tryDataUri();
+              }
+            }, 2000);
+          } catch(err) {
+            console.log('[小游戏] Blob URL 创建失败，降级为 data URI', err);
+            tryDataUri();
+          }
+        }
+
+        // 方法2: data:text/html URI（兼容 iOS）
+        function tryDataUri(){
+          console.log('[小游戏] 尝试 data URI 加载');
+          mgLoadSuccess = false;
+          try {
+            var dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(rawCode);
+            mgIframe.onload = function(){
+              mgLoadSuccess = true;
+              if(mgLoadTimer) clearTimeout(mgLoadTimer);
+              console.log('[小游戏] data URI 加载成功');
+            };
+            mgIframe.src = dataUri;
+            mgIframe.style.display = '';
+
+            mgLoadTimer = setTimeout(function(){
+              if(!mgLoadSuccess){
+                console.log('[小游戏] data URI 2秒未加载成功，降级为 srcdoc');
+                trySrcdoc();
+              }
+            }, 2000);
+          } catch(err) {
+            console.log('[小游戏] data URI 创建失败，降级为 srcdoc', err);
+            trySrcdoc();
+          }
+        }
+
+        // 方法3: srcdoc + sandbox（最终降级）
+        function trySrcdoc(){
+          console.log('[小游戏] 尝试 srcdoc + sandbox 加载');
+          mgLoadSuccess = false;
+          try {
+            mgIframe.removeAttribute('src');
+            mgIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock');
+            mgIframe.setAttribute('srcdoc', rawCode);
+            mgIframe.style.display = '';
+
+            // srcdoc 可能不触发 onload，1秒后假定成功
+            mgLoadTimer = setTimeout(function(){
+              console.log('[小游戏] srcdoc 已设置');
+              mgLoadSuccess = true;
+            }, 1000);
+
+            // 额外5秒检测：如果仍未收到 postMessage 响应，显示降级按钮
+            setTimeout(function(){
+              if(!mgFinished){
+                console.log('[小游戏] srcdoc 加载后无响应，显示降级按钮');
+                showFallbackButton();
+              }
+            }, 5000);
+          } catch(err) {
+            console.log('[小游戏] srcdoc 设置失败，显示降级按钮', err);
+            showFallbackButton();
+          }
+        }
+
+        // 启动加载流程
+        tryBlobUrl();
+
+      } else if(mgIframe) {
+        // URL模式：iframe已有src，直接显示
+        console.log('[小游戏iframe] URL模式，src:', mgIframe.src);
+        mgIframe.style.display = '';
+        if(mgLoading) mgLoading.style.display = 'none';
+        // URL模式加载超时
+        var urlLoadTimer = setTimeout(function(){
+          if(mgLoading){
+            mgLoading.textContent = '小游戏加载较慢，请稍候...';
+          }
+        }, 8000);
+        mgIframe.onload = function(){
+          clearTimeout(urlLoadTimer);
+          if(mgLoading) mgLoading.style.display = 'none';
+          console.log('[小游戏iframe] URL模式加载完成');
+        };
+        // URL模式也加超时降级：10秒后无响应显示降级按钮
+        setTimeout(function(){
+          if(!mgFinished){
+            console.log('[小游戏] URL模式 10秒无响应，显示降级按钮');
+            showFallbackButton();
+          }
+        }, 10000);
+      } else {
+        console.error('[小游戏iframe] 未找到iframe元素！');
+        showFallbackButton();
+      }
+    } else if(kind === 'minigame' && !hasEmbed){
+      // 非嵌入型小游戏：显示提示后自动跳转到第一个连接的节点
+      showOptions();
+      if(optionsEl) optionsEl.classList.remove('vn-paragraphs-done');
+      // 自动跳转到第一个连接的节点（3秒后）
+      var mgAutoNext = findNextNode(node);
+      if(mgAutoNext){
+        // 添加倒计时提示
+        var countdownEl = document.createElement('div');
+        countdownEl.style.cssText = 'text-align:center;margin-top:12px;color:var(--text-dim);font-size:0.85rem;';
+        countdownEl.textContent = '3秒后自动继续...';
+        if(optionsEl) optionsEl.appendChild(countdownEl);
+        var mgCountdown = 3;
+        var mgTimer = setInterval(function(){
+          mgCountdown--;
+          if(countdownEl){
+            countdownEl.textContent = mgCountdown + '秒后自动继续...';
+          }
+          if(mgCountdown <= 0){
+            clearInterval(mgTimer);
+            renderNode(mgAutoNext);
+          }
+        }, 1000);
+      }
+    } else if(textEl && paragraphs && paragraphs.length > 0){
+      showNextParagraph();
+      if(dialogueBox){
+        dialogueBox.addEventListener('click', function(){
+          if(allParagraphsShown) return;
+          showNextParagraph();
+        });
+      }
+      // 键盘支持：按斜杠/、回车或空格切换（使用全局handler避免累积监听器）
+      if(window._vnKeyHandler){
+        document.removeEventListener('keydown', window._vnKeyHandler);
+      }
+      window._vnKeyHandler = function(e){
+        if(e.key === '/' || e.key === 'Enter' || e.key === ' '){
+          if(!allParagraphsShown){
+            e.preventDefault();
+            showNextParagraph();
+          }
+        }
+      };
+      document.addEventListener('keydown', window._vnKeyHandler);
+    } else {
+      // 没有正文，直接显示选项
+      showOptions();
+    }
+
+    // 绑定选项点击事件
+    var btns = card.querySelectorAll('.option-btn');
+    btns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.disabled) return;
+
+        var optId = btn.getAttribute('data-opt-id');
+        var optIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+        var resultId = btn.getAttribute('data-result-id');
+
+        if(resultId){
+          var mgNode = node;
+          var muts = mgNode.data.minigameResultMutations && mgNode.data.minigameResultMutations[resultId];
+          if(!muts){
+            if(resultId === 'success') muts = mgNode.data.successMutations || [];
+            else if(resultId === 'failure') muts = mgNode.data.failureMutations || [];
+            else muts = [];
+          }
+          applyMutations(muts);
+
+          var outEdges = outgoingMap[node.id] || [];
+          var edge = outEdges.find(function(e){
+            return getEdgeSourceEndId(e) === resultId;
+          });
+          if(!edge) edge = outEdges.find(function(e){ return getEdgeSourceOptionId(e) === null && getEdgeSourceEndId(e) === null; });
+          if(!edge) edge = outEdges[0];
+
+          var nextN = edge ? nodeMap[edge.target] : null;
+          if(nextN){
+            renderNode(nextN);
+          } else {
+            renderEnd();
+          }
+          return;
+        }
+
+        var options = data.options || [];
+        var option = options[optIdx] || options.find(function(o){ return o.id === optId; });
+        if(option){
+          applyMutations(option.mutations);
+          var target = findOptionTarget(node, optId, optIdx);
+          if(!target) target = findNextNode(node);
+          if(target){
+            renderNode(target);
+          } else {
+            renderEnd();
+          }
+        }
+      });
+    });
+
+    // ===== 小游戏 postMessage 监听（完全重写） =====
+    // 清理之前的监听器
+    if(window._vnMgHandler){
+      window.removeEventListener('message', window._vnMgHandler);
+      window._vnMgHandler = null;
+    }
+
+    // 嵌入型小游戏：设置 postMessage 监听
+    if(isEmbeddedMinigame){
+      var mgFbEl = card.querySelector('.mg-feedback');
+      var mgIframeEl2 = card.querySelector('.mg-iframe');
+      var mgNodeRef2 = node;
+      var mgFinished = false;
+
+      // 获取自定义返回状态列表
+      var mgResultDefs = data.minigameResults || [{ id: 'success', label: '成功' }, { id: 'failure', label: '失败' }];
+
+      // 根据返回值匹配结果定义
+      function matchResultDef(val){
+        if(!val) return null;
+        var s = String(val);
+        // 1. 精确匹配 id
+        var m = mgResultDefs.find(function(r){ return r.id === s; });
+        if(m) return m;
+        // 2. 匹配 label
+        m = mgResultDefs.find(function(r){ return r.label === s; });
+        if(m) return m;
+        // 3. 大小写不敏感匹配 id
+        m = mgResultDefs.find(function(r){ return String(r.id).toLowerCase() === s.toLowerCase(); });
+        if(m) return m;
+        // 4. 大小写不敏感匹配 label
+        m = mgResultDefs.find(function(r){ return String(r.label || '').toLowerCase() === s.toLowerCase(); });
+        if(m) return m;
+        return null;
+      }
+
+      // 从消息中提取结果值，支持多种格式
+      function extractResult(msgData){
+        if(typeof msgData === 'string'){
+          // 纯字符串消息
+          return msgData;
+        }
+        if(!msgData || typeof msgData !== 'object') return null;
+        // 标准格式: {type: "funloom:minigame:complete", result: "..."}
+        if(msgData.type === 'funloom:minigame:complete' || msgData.type === 'minigame:complete' || msgData.type === 'minigameComplete'){
+          return msgData.result || msgData.resultId || msgData.value || 'success';
+        }
+        // 简化格式: {result: "..."}
+        if(msgData.result) return msgData.result;
+        if(msgData.resultId) return msgData.resultId;
+        // 布尔格式: {success: true/false}
+        if(typeof msgData.success === 'boolean') return msgData.success ? 'success' : 'failure';
+        if(typeof msgData.win === 'boolean') return msgData.win ? 'success' : 'failure';
+        // action 格式: {action: "complete", result: "..."}
+        if(msgData.action === 'complete' || msgData.action === 'end'){
+          return msgData.result || msgData.resultId || 'success';
+        }
+        return null;
+      }
+
+      window._vnMgHandler = function(e){
+        if(mgFinished) return;
+
+        var resultVal = extractResult(e.data);
+        if(resultVal === null) return;
+
+        mgFinished = true;
+
+        // 诊断日志：打印收到的消息和提取的结果
+        console.log('[小游戏postMessage] 收到消息:', e.data);
+        console.log('[小游戏postMessage] 提取结果值:', resultVal);
+
+        // 匹配结果定义
+        var matched = matchResultDef(resultVal);
+        var resultId = matched ? matched.id : resultVal;
+        var resultLabel = matched ? (matched.label || matched.id) : resultVal;
+
+        console.log('[小游戏postMessage] 匹配结果定义:', matched ? matched.id : '(无匹配)', '-> resultId:', resultId);
+
+        // 分配样式
+        var fbIcon, fbColor, fbBg, fbBorder;
+        if(resultId === 'perfect'){
+          fbIcon = '🏆'; fbColor = 'var(--minigame)';
+          fbBg = 'linear-gradient(135deg, rgba(167,139,250,.18), rgba(251,191,36,.12))';
+          fbBorder = '1px solid rgba(167,139,250,.4)';
+        } else if(resultId === 'success'){
+          fbIcon = '✅'; fbColor = 'var(--plot)';
+          fbBg = 'rgba(74,222,128,.12)';
+          fbBorder = '1px solid rgba(74,222,128,.3)';
+        } else if(resultId === 'failure' || resultId === 'fail'){
+          fbIcon = '❌'; fbColor = 'var(--ending)';
+          fbBg = 'rgba(248,113,113,.12)';
+          fbBorder = '1px solid rgba(248,113,113,.3)';
+        } else {
+          fbIcon = '🎮'; fbColor = 'var(--accent)';
+          fbBg = 'rgba(91,140,255,.12)';
+          fbBorder = '1px solid rgba(91,140,255,.3)';
+        }
+
+        // 显示反馈
+        if(mgFbEl){
+          mgFbEl.style.display = '';
+          mgFbEl.style.background = fbBg;
+          mgFbEl.style.border = fbBorder;
+          mgFbEl.innerHTML = '<div class="mg-fb-icon">' + fbIcon + '</div>' +
+            '<div class="mg-fb-title" style="color:' + fbColor + '">' + escapeText(resultLabel) + '</div>' +
+            '<div class="mg-fb-sub">即将继续剧情...</div>';
+        }
+
+        // 半透明化iframe
+        if(mgIframeEl2) mgIframeEl2.classList.add('mg-done');
+
+        // 应用变异
+        var muts = mgNodeRef2.data.minigameResultMutations && mgNodeRef2.data.minigameResultMutations[resultId];
+        if(!muts){
+          if(resultId === 'success' || resultId === 'perfect') muts = mgNodeRef2.data.successMutations || [];
+          else if(resultId === 'failure' || resultId === 'fail') muts = mgNodeRef2.data.failureMutations || [];
+          else muts = [];
+        }
+        applyMutations(muts);
+
+        // 查找对应的边并跳转
+        var outEdges = outgoingMap[node.id] || [];
+        var targetEdge = null;
+
+        // 诊断日志：打印出边信息
+        console.log('[小游戏postMessage] 节点', node.id, '的出边:', outEdges.length, '条');
+        outEdges.forEach(function(ed, i) {
+          console.log('[小游戏postMessage] 边[' + i + ']', 'sourceHandle:', ed.sourceHandle, 'sourceEndId:', getEdgeSourceEndId(ed), 'target:', ed.target);
+        });
+
+        // 1. 精确匹配 resultId
+        targetEdge = outEdges.find(function(ed){ return getEdgeSourceEndId(ed) === resultId; });
+        // 2. 匹配原始返回值
+        if(!targetEdge) targetEdge = outEdges.find(function(ed){ return getEdgeSourceEndId(ed) === resultVal; });
+        // 3. 匹配 label
+        if(!targetEdge && matched) targetEdge = outEdges.find(function(ed){ return getEdgeSourceEndId(ed) === matched.label; });
+        // 4. 大小写不敏感匹配
+        if(!targetEdge){
+          var lowerRid = String(resultId).toLowerCase();
+          targetEdge = outEdges.find(function(ed){
+            var eid = getEdgeSourceEndId(ed);
+            return eid && String(eid).toLowerCase() === lowerRid;
+          });
+        }
+        // 5. 无标记的默认边
+        if(!targetEdge) targetEdge = outEdges.find(function(ed){ return getEdgeSourceOptionId(ed) === null && getEdgeSourceEndId(ed) === null; });
+        // 6. 第一条边
+        if(!targetEdge) targetEdge = outEdges[0];
+
+        var nextNode = targetEdge ? nodeMap[targetEdge.target] : null;
+
+        console.log('[小游戏postMessage] 最终匹配边:', targetEdge ? targetEdge.id : '(无)', '-> 目标节点:', nextNode ? nextNode.id : '(无)');
+
+        // 延迟跳转
+        setTimeout(function(){
+          if(window._vnMgHandler){
+            window.removeEventListener('message', window._vnMgHandler);
+            window._vnMgHandler = null;
+          }
+          if(nextNode){
+            renderNode(nextNode);
+          } else {
+            renderEnd();
+          }
+        }, 2000);
+      };
+
+      window.addEventListener('message', window._vnMgHandler);
+    }
+
+    // 无选项节点自动跳转已由段落渐进系统处理（showOptions 函数中）
+
+    updateVarsPanel();
+  }
+
+  function renderEnd(){
+    root.innerHTML = '<div class="node-card ending-card"><div class="node-title">剧情已结束</div><div class="node-body">当前路线没有后续剧情节点了。</div></div>';
+    if(!ENDING_SETTINGS.publishSettings.hideRestartBtn){
+      var restart = document.createElement('button');
+      restart.className = 'restart-btn';
+      restart.textContent = '重新开始';
+      restart.onclick = function(){ startGame(); };
+      root.appendChild(restart);
+    }
+  }
+
+  // ==================== 启动游戏 ====================
+  function startGame(){
+    history = [];
+    variables.forEach(function(v){
+      var val = getVarDefault(v);
+      if(v.type === 'int'){
+        val = Number(val);
+        if(isNaN(val)) val = 0;
+      }
+      else if(v.type === 'bool') val = val === true || val === 'true' || val === '1' || val === 1;
+      else if(v.type === 'enum') val = String(val || '');
+      variableState[v.id] = val;
+    });
+
+    root.innerHTML = '<div class="loading">正在加载...</div>';
+
+    if(entryNodeId && nodeMap[entryNodeId]){
+      renderNode(nodeMap[entryNodeId]);
+    } else {
+      var firstNode = nodes.find(function(n){ return (n.data && (n.data.kind === 'plot' || n.type === 'plot')) || n.type === 'plot'; });
+      if(firstNode){
+        renderNode(firstNode);
+      } else if(nodes.length > 0){
+        renderNode(nodes[0]);
+      } else {
+        root.innerHTML = '<div class="node-card"><div class="node-body">没有找到任何剧情节点。</div></div>';
+      }
+    }
+  }
+
+  // 显示标题页
+  function showTitleScreen(){
+    // 如果设置了隐藏标题页，直接开始游戏
+    if(ENDING_SETTINGS.publishSettings.hideTitleScreen){
+      startGame();
+      return;
+    }
+    var outline = PROJECT.outline || {};
+    var titleEl = document.createElement('div');
+    titleEl.style.textAlign = 'center';
+    titleEl.innerHTML = '<h1 class="game-title">' + escapeText(outline.projectTitle || '未命名剧本') + '</h1>' +
+      (outline.tone ? '<p class="game-subtitle">' + escapeText(outline.tone) + '</p>' : '') +
+      (outline.opening ? '<p class="game-subtitle">' + escapeText(outline.opening) + '</p>' : '') +
+      (outline.world ? '<div class="node-card" style="margin-top:24px;text-align:left"><div class="node-body">' + escapeText(outline.world).replace(/\n/g,'<br>') + '</div></div>' : '');
+    var startBtn = document.createElement('button');
+    startBtn.className = 'restart-btn';
+    startBtn.textContent = '开始游戏';
+    startBtn.style.marginTop = '24px';
+    startBtn.onclick = function(){ startGame(); };
+    root.innerHTML = '';
+    root.appendChild(titleEl);
+    root.appendChild(startBtn);
+
+    // 在开始游戏下方添加结局查询按钮
+    if(!ENDING_SETTINGS.publishSettings.hideEndingGallery){
+      var endingGalleryBtn = document.createElement('button');
+      endingGalleryBtn.className = 'restart-btn';
+      endingGalleryBtn.textContent = '结局查询';
+      endingGalleryBtn.style.marginTop = '8px';
+      endingGalleryBtn.onclick = function(){ showEndingGallery(); };
+      root.appendChild(endingGalleryBtn);
+    }
+  }
+
+  // ==================== 结局查询面板 ====================
+  var _hiddenEndingSet = {};
+  (ENDING_SETTINGS.publishSettings.hiddenEndings || []).forEach(function(eid){ _hiddenEndingSet[eid] = true; });
+
+  function showEndingGallery(){
+    root.innerHTML = '';
+    var card = document.createElement('div');
+    card.className = 'node-card';
+    card.style.maxWidth = '600px';
+
+    var html = '<span class="node-type-badge ending">结局图鉴</span>';
+    html += '<div class="node-title">结局查询</div>';
+
+    var visibleEndings = ALL_ENDINGS.filter(function(e){ return !_hiddenEndingSet[e.id]; });
+
+    if(visibleEndings.length === 0){
+      html += '<div class="node-body">本剧本暂无结局节点。</div>';
+    } else {
+      var reachedCount = visibleEndings.filter(function(e){ return reachedEndings[e.id]; }).length;
+      html += '<div style="margin-bottom:12px;color:var(--text-dim);font-size:0.85rem">已达成 ' + reachedCount + '/' + visibleEndings.length + ' 个结局</div>';
+      visibleEndings.forEach(function(ending, idx){
+        var reached = reachedEndings[ending.id];
+        var showThis = reached || ENDING_SETTINGS.showLockedEndings;
+        if(!showThis) return;
+
+        var displayTitle = reached ? ending.title : '???';
+        if(!reached && ENDING_SETTINGS.hideLockedEndingNames) displayTitle = '???';
+        var displayClue = reached ? (ending.body || '') : (ending.clue || '???');
+
+        html += '<div class="ending-gallery-item" style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;' + (reached ? '' : 'opacity:0.6') + '">';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+        html += '<span style="font-size:1.2rem">' + (reached ? '✅' : '🔒') + '</span>';
+        html += '<strong style="font-size:1.1rem;color:' + (reached ? 'var(--ending)' : 'var(--text-dim)') + '">' + escapeText(displayTitle) + '</strong>';
+        html += '</div>';
+        if(displayClue && displayClue !== '???'){
+          html += '<div style="color:var(--text-dim);font-size:0.9rem;line-height:1.6">' + escapeText(displayClue).replace(/\n/g, '<br>') + '</div>';
+        } else {
+          html += '<div style="color:var(--text-dim);font-size:0.9rem;font-style:italic">???</div>';
+        }
+        html += '</div>';
+      });
+    }
+
+    html += '<div style="margin-top:16px">';
+    html += '<button class="restart-btn" id="back-to-title">返回标题</button>';
+    html += '</div>';
+
+    card.innerHTML = html;
+    root.appendChild(card);
+
+    var backBtn = document.getElementById('back-to-title');
+    if(backBtn){
+      backBtn.onclick = function(){ showTitleScreen(); };
+    }
+  }
+
+  showTitleScreen();
+})();
+
+// ==================== 主题切换功能 ====================
+var _allowThemeToggle = false;
+function toggleTheme(){
+  if(!_allowThemeToggle) return;
+  var root = document.documentElement;
+  var current = root.getAttribute('data-theme') || 'dark';
+  var next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+
+  var themes = {
+    dark: {'--bg':'#0f1115','--card':'#1a1d24','--border':'#2a2e38','--text':'#e2e4e9','--text-dim':'#8b92a8','--accent':'#5b8cff','--accent-dim':'#3d5a99','--plot':'#4ade80','--option':'#fbbf24','--ending':'#f87171','--minigame':'#a78bfa'},
+    light: {'--bg':'#f5f5f5','--card':'#ffffff','--border':'#e0e0e0','--text':'#333333','--text-dim':'#888888','--accent':'#2563eb','--accent-dim':'#93c5fd','--plot':'#16a34a','--option':'#d97706','--ending':'#dc2626','--minigame':'#7c3aed'}
+  };
+  var vars = themes[next];
+  for(var k in vars){ root.style.setProperty(k, vars[k]); }
+}
+function downloadPage(){
+  var html = document.documentElement.outerHTML;
+  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = EXPORT_FILE_NAME + '.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+<footer class="footer">由 七七剧本杀 导出</footer>
+</body>
+</html>
